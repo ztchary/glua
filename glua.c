@@ -2,16 +2,49 @@
 #include <lualib.h>
 #include <lauxlib.h>
 #include <stdlib.h>
-#include <string.h>
 #include <SDL2/SDL.h>
 #include "keys.h"
 
 SDL_Window *window;
 SDL_Renderer *renderer;
+SDL_AudioDeviceID audio_id;
 bool quit = false;
 int glua_draw_func = LUA_REFNIL;
 int glua_key_func = LUA_REFNIL;
 bool sdl_init = false;
+
+int glua_init(lua_State *L) {
+	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) != 0) {
+		lua_pushboolean(L, 0);
+		return 1;
+	}
+
+	int width = luaL_checknumber(L, 1);
+	int height = luaL_checknumber(L, 2);
+
+	window = SDL_CreateWindow("glua", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, 0);
+	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_PRESENTVSYNC);
+	if (renderer) SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+
+	SDL_AudioSpec spec = {
+		.freq = 44100,
+		.format = AUDIO_S16SYS,
+		.channels = 1,
+		.samples = 1024,
+		.callback = NULL,
+	};
+
+	audio_id = SDL_OpenAudioDevice(NULL, 0, &spec, NULL, 0);
+
+	lua_pushboolean(L, window && renderer);
+	return 1;
+}
+
+void assert_initd(lua_State *L) {
+	if (!window || !renderer) {
+		luaL_error(L, "glua must be initialized");
+	}
+}
 
 SDL_FRect *lua_get_rects(lua_State *L, int *n) {
 	*n = lua_rawlen(L, 1);
@@ -34,7 +67,7 @@ SDL_FRect *lua_get_rects(lua_State *L, int *n) {
 			if (!lua_isnumber(L, 3)) {
 				free(rects);
 				luaL_error(L, "rects must contain numbers");
-			return NULL;
+				return NULL;
 			}
 			rect[j] = lua_tonumber(L, 3);
 			lua_pop(L, 1);
@@ -42,12 +75,6 @@ SDL_FRect *lua_get_rects(lua_State *L, int *n) {
 		lua_pop(L, 1);
 	}
 	return rects;
-}
-
-void assert_initd(lua_State *L) {
-	if (!window || !renderer) {
-		luaL_error(L, "glua must be initialized");
-	}
 }
 
 void crash_if(lua_State *L, bool do_crash) {
@@ -61,22 +88,6 @@ void crash_if(lua_State *L, bool do_crash) {
 int glua_quit(lua_State *L) {
 	quit = true;
 	return 0;
-}
-
-int glua_init(lua_State *L) {
-	if (SDL_Init(SDL_INIT_VIDEO) != 0) {
-		lua_pushboolean(L, 0);
-		return 1;
-	}
-
-	int width = luaL_checknumber(L, 1);
-	int height = luaL_checknumber(L, 2);
-
-	window = SDL_CreateWindow("glua", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, 0);
-	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_PRESENTVSYNC);
-	if (renderer) SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
-	lua_pushboolean(L, window && renderer);
-	return 1;
 }
 
 int glua_set_draw(lua_State *L) {
@@ -165,17 +176,39 @@ int glua_fill_rects(lua_State *L) {
 	return 0;
 }
 
+int glua_play_samples(lua_State *L) {
+	assert_initd(L);
+	luaL_checktype(L, 1, LUA_TTABLE);
+	int n = lua_rawlen(L, 1);
+	short *samples = malloc(sizeof(short) * n);
+	for (int i = 0; i < n; i++) {
+		lua_rawgeti(L, 1, i + 1);
+		if (!lua_isnumber(L, 2)) {
+			free(samples);
+			luaL_error(L, "samples must be numbers");
+			return 0;
+		}
+		samples[i] = (short)(lua_tonumber(L, 2) * 32767.0);
+		lua_pop(L, 1);
+	}
+	SDL_QueueAudio(audio_id, samples, sizeof(short) * n);
+	SDL_PauseAudioDevice(audio_id, 0);
+	free(samples);
+	return 0;
+}
+
 struct luaL_Reg glua_api[] = {
-	{"quit",       glua_quit},
-	{"init",       glua_init},
-	{"set_color",  glua_set_color},
-	{"set_draw",   glua_set_draw},
-	{"on_key",     glua_on_key},
-	{"clear",      glua_clear},
-	{"draw_rect",  glua_draw_rect},
-	{"draw_rects", glua_draw_rects},
-	{"fill_rect",  glua_fill_rect},
-	{"fill_rects", glua_fill_rects},
+	{"quit",         glua_quit},
+	{"init",         glua_init},
+	{"set_color",    glua_set_color},
+	{"set_draw",     glua_set_draw},
+	{"on_key",       glua_on_key},
+	{"clear",        glua_clear},
+	{"draw_rect",    glua_draw_rect},
+	{"draw_rects",   glua_draw_rects},
+	{"fill_rect",    glua_fill_rect},
+	{"fill_rects",   glua_fill_rects},
+	{"play_samples", glua_play_samples},
 	{NULL, NULL},
 };
 

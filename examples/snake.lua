@@ -2,6 +2,14 @@ FRAMERATE = 5
 SIZE = 25 COLS = 20
 ROWS = 15 
 
+APPLE_SOUND = {}
+DEATH_SOUND = {}
+
+for i = 1, 5000 do
+	table.insert(APPLE_SOUND, math.sin(i/25)*(1-i/5000))
+	table.insert(DEATH_SOUND, math.sin(i/50)*(1-i/5000))
+end
+
 if not glua.init(COLS * SIZE, ROWS * SIZE) then
 	print("glua init failed")
 	glua.quit()
@@ -42,6 +50,7 @@ function update()
 		snake = { { math.random(COLS) - 1, math.random(ROWS) - 1 } }
 		mov_queue = { { 0, 0 } }
 		new_apple()
+		glua.play_samples(DEATH_SOUND)
 		return
 	end
 
@@ -50,6 +59,7 @@ function update()
 	if head_x == apple_x and head_y == apple_y then
 		length = length + 1
 		new_apple()
+		glua.play_samples(APPLE_SOUND)
 	end
 
 	while #snake > length do
