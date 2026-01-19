@@ -1,6 +1,5 @@
 FRAMERATE = 5
-SIZE = 25
-COLS = 20
+SIZE = 25 COLS = 20
 ROWS = 15 
 
 if not glua.init(COLS * SIZE, ROWS * SIZE) then
@@ -102,8 +101,8 @@ glua.set_draw(function(dt)
 	glua.set_color(0, 0, 0, 1)
 	glua.clear()
 	glua.set_color(0, 1, 0, 1)
-	glua.rects(snake_to_rects())
+	glua.draw_rects(snake_to_rects())
 	glua.set_color(1, 0, 0, 1)
-	glua.rects({ { apple_x * SIZE, apple_y * SIZE, SIZE, SIZE } })
+	glua.draw_rect(apple_x * SIZE, apple_y * SIZE, SIZE, SIZE)
 end)
 

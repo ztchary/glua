@@ -121,23 +121,61 @@ int glua_clear(lua_State *L) {
 	return 0;
 }
 
-int glua_rects(lua_State *L) {
+int glua_draw_rect(lua_State *L) {
+	assert_initd(L);
+	SDL_FRect rect;
+	rect.x = luaL_checknumber(L, 1);
+	rect.y = luaL_checknumber(L, 2);
+	rect.w = luaL_checknumber(L, 3);
+	rect.h = luaL_checknumber(L, 4);
+	SDL_RenderDrawRectF(renderer, &rect);
+	return 0;
+}
+
+int glua_draw_rects(lua_State *L) {
 	assert_initd(L);
 	luaL_checktype(L, 1, LUA_TTABLE);
 	int n;
 	SDL_FRect *rects = lua_get_rects(L, &n);
+	if (!rects) return 0;
+	SDL_RenderDrawRectsF(renderer, rects, n);
+	free(rects);
+	return 0;
+}
+
+int glua_fill_rect(lua_State *L) {
+	assert_initd(L);
+	SDL_FRect rect;
+	rect.x = luaL_checknumber(L, 1);
+	rect.y = luaL_checknumber(L, 2);
+	rect.w = luaL_checknumber(L, 3);
+	rect.h = luaL_checknumber(L, 4);
+	SDL_RenderFillRectF(renderer, &rect);
+	return 0;
+}
+
+int glua_fill_rects(lua_State *L) {
+	assert_initd(L);
+	luaL_checktype(L, 1, LUA_TTABLE);
+	int n;
+	SDL_FRect *rects = lua_get_rects(L, &n);
+	if (!rects) return 0;
 	SDL_RenderFillRectsF(renderer, rects, n);
+	free(rects);
 	return 0;
 }
 
 struct luaL_Reg glua_api[] = {
-	{"quit",      glua_quit},
-	{"init",      glua_init},
-	{"set_color", glua_set_color},
-	{"set_draw",  glua_set_draw},
-	{"on_key",    glua_on_key},
-	{"clear",     glua_clear},
-	{"rects",     glua_rects},
+	{"quit",       glua_quit},
+	{"init",       glua_init},
+	{"set_color",  glua_set_color},
+	{"set_draw",   glua_set_draw},
+	{"on_key",     glua_on_key},
+	{"clear",      glua_clear},
+	{"draw_rect",  glua_draw_rect},
+	{"draw_rects", glua_draw_rects},
+	{"fill_rect",  glua_fill_rect},
+	{"fill_rects", glua_fill_rects},
 	{NULL, NULL},
 };
 
