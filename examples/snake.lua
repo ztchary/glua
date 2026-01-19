@@ -16,27 +16,6 @@ local length = 3;
 local apple_x = math.random(COLS) - 1
 local apple_y = math.random(ROWS) - 1
 
-glua.on_key(function(keycode, keydown)
-	if not keydown then return end
-	if keycode == glua.keycode.KEY_Q then
-		glua.quit()
-	end
-	if #mov_queue > 5 then return end
-	if keycode == glua.keycode.KEY_RIGHT then
-		if mov_queue[#mov_queue][1] ~= 0 then return end
-		table.insert(mov_queue, {1, 0})
-	elseif keycode == glua.keycode.KEY_LEFT then
-		if mov_queue[#mov_queue][1] ~= 0 then return end
-		table.insert(mov_queue, {-1, 0})
-	elseif keycode == glua.keycode.KEY_UP then
-		if mov_queue[#mov_queue][2] ~= 0 then return end
-		table.insert(mov_queue, {0, -1})
-	elseif keycode == glua.keycode.KEY_DOWN then
-		if mov_queue[#mov_queue][2] ~= 0 then return end
-		table.insert(mov_queue, {0, 1})
-	end
-end)
-
 function hitting_snake(x, y)
 	for i = 1, #snake do
 		if snake[i][1] == x and snake[i][2] == y then
@@ -92,6 +71,27 @@ function snake_to_rects()
 	return out
 end
 
+glua.on_key(function(keycode, keydown)
+	if not keydown then return end
+	if keycode == glua.keycode.KEY_Q then
+		glua.quit()
+	end
+	if #mov_queue > 5 then return end
+	if keycode == glua.keycode.KEY_RIGHT then
+		if mov_queue[#mov_queue][1] ~= 0 then return end
+		table.insert(mov_queue, {1, 0})
+	elseif keycode == glua.keycode.KEY_LEFT then
+		if mov_queue[#mov_queue][1] ~= 0 then return end
+		table.insert(mov_queue, {-1, 0})
+	elseif keycode == glua.keycode.KEY_UP then
+		if mov_queue[#mov_queue][2] ~= 0 then return end
+		table.insert(mov_queue, {0, -1})
+	elseif keycode == glua.keycode.KEY_DOWN then
+		if mov_queue[#mov_queue][2] ~= 0 then return end
+		table.insert(mov_queue, {0, 1})
+	end
+end)
+
 ts = 0
 glua.set_draw(function(dt)
 	ts = ts + dt
@@ -99,11 +99,11 @@ glua.set_draw(function(dt)
 		update()
 		ts = ts - 1/FRAMERATE
 	end
-	glua.set_color(0, 0, 0)
+	glua.set_color(0, 0, 0, 1)
 	glua.clear()
-	glua.set_color(0, 1, 0)
+	glua.set_color(0, 1, 0, 1)
 	glua.rects(snake_to_rects())
-	glua.set_color(1, 0, 0)
+	glua.set_color(1, 0, 0, 1)
 	glua.rects({ { apple_x * SIZE, apple_y * SIZE, SIZE, SIZE } })
 end)
 

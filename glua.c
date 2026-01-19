@@ -13,6 +13,37 @@ int glua_draw_func = LUA_REFNIL;
 int glua_key_func = LUA_REFNIL;
 bool sdl_init = false;
 
+SDL_FRect *lua_get_rects(lua_State *L, int *n) {
+	*n = lua_rawlen(L, 1);
+	SDL_FRect *rects = malloc(*n * sizeof(SDL_FRect));
+	for (int i = 0; i < *n; i++) {
+		lua_rawgeti(L, 1, i + 1);
+		if (!lua_istable(L, 2)) {
+			free(rects);
+			luaL_error(L, "rects must be tables");
+			return NULL;
+		}
+		if (lua_rawlen(L, 2) != 4) {
+			free(rects);
+			luaL_error(L, "rects must have four values");
+			return NULL;
+		}
+		float *rect = (float *)&rects[i];
+		for (int j = 0; j < 4; j++) {
+			lua_rawgeti(L, 2, j + 1);
+			if (!lua_isnumber(L, 3)) {
+				free(rects);
+				luaL_error(L, "rects must contain numbers");
+			return NULL;
+			}
+			rect[j] = lua_tonumber(L, 3);
+			lua_pop(L, 1);
+		}
+		lua_pop(L, 1);
+	}
+	return rects;
+}
+
 void assert_initd(lua_State *L) {
 	if (!window || !renderer) {
 		luaL_error(L, "glua must be initialized");
@@ -43,6 +74,7 @@ int glua_init(lua_State *L) {
 
 	window = SDL_CreateWindow("glua", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, 0);
 	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_PRESENTVSYNC);
+	if (renderer) SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
 	lua_pushboolean(L, window && renderer);
 	return 1;
 }
@@ -65,7 +97,8 @@ int glua_set_color(lua_State *L) {
 	int r = (int)(luaL_checknumber(L, 1) * 255.0);
 	int g = (int)(luaL_checknumber(L, 2) * 255.0);
 	int b = (int)(luaL_checknumber(L, 3) * 255.0);
-	SDL_SetRenderDrawColor(renderer, r, g, b, 255);
+	int a = (int)(luaL_checknumber(L, 4) * 255.0);
+	SDL_SetRenderDrawColor(renderer, r, g, b, a);
 	return 0;
 }
 
@@ -91,32 +124,9 @@ int glua_clear(lua_State *L) {
 int glua_rects(lua_State *L) {
 	assert_initd(L);
 	luaL_checktype(L, 1, LUA_TTABLE);
-	int n = lua_rawlen(L, 1);
-	SDL_FRect *rects = malloc(n * sizeof(SDL_FRect));
-	for (int i = 0; i < n; i++) {
-		lua_rawgeti(L, 1, i + 1);
-		if (!lua_istable(L, 2)) {
-			free(rects);
-			luaL_error(L, "rects must be tables");
-		}
-		if (lua_rawlen(L, 2) != 4) {
-			free(rects);
-			luaL_error(L, "rects must have four values");
-		}
-		float *rect = (float *)&rects[i];
-		for (int j = 0; j < 4; j++) {
-			lua_rawgeti(L, 2, j + 1);
-			if (!lua_isnumber(L, 3)) {
-				free(rects);
-				luaL_error(L, "rects must contain numbers");
-			}
-			rect[j] = lua_tonumber(L, 3);
-			lua_pop(L, 1);
-		}
-		lua_pop(L, 1);
-	}
+	int n;
+	SDL_FRect *rects = lua_get_rects(L, &n);
 	SDL_RenderFillRectsF(renderer, rects, n);
-	free(rects);
 	return 0;
 }
 
