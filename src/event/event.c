@@ -18,11 +18,11 @@ void glua_event_handle(lua_State *L, SDL_Event *e) {
 	switch (e->type) {
 	case SDL_KEYDOWN:
 		if (e->key.repeat != 0) break;
-		lua_pushstring(L, glua_keyboard_keys[e->key.keysym.scancode]);
+		lua_pushstring(L, glua_keyboard_keys[e->key.keysym.scancode - 4]);
 		glua_call_event(L, "on_keydown", 1);
 		break;
 	case SDL_KEYUP:
-		lua_pushstring(L, glua_keyboard_keys[e->key.keysym.scancode]);
+		lua_pushstring(L, glua_keyboard_keys[e->key.keysym.scancode - 4]);
 		glua_call_event(L, "on_keyup", 1);
 		break;
 	case SDL_QUIT:

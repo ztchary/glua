@@ -5,7 +5,7 @@ int glua_keyboard_is_pressed(lua_State *L) {
 	const char *keyname = luaL_checkstring(L, 1);
 	for (int i = 0; i < 100; i++) {
 		if (strcmp(keyname, glua_keyboard_keys[i]) == 0) {
-			lua_pushboolean(L, keyboard_state[i]);
+			lua_pushboolean(L, keyboard_state[i+4]);
 			return 1;
 		}
 	}

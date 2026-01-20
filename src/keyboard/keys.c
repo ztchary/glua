@@ -1,10 +1,6 @@
 // https://wiki.libsdl.org/SDL2/SDL_Scancode
 
 const char *glua_keyboard_keys[] = {
-	"",
-	"",
-	"",
-	"",
 	"a",
 	"b",
 	"c",
