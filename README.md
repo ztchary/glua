@@ -36,6 +36,8 @@ these functions should be defined in your code...
 
 `glua.graphics.clear()` clears the screen with the drawing color
 
+`glua.graphics.show()` displays the rendered image on the screen (required)
+
 `glua.graphics.draw_rect(x, y, w, h)` draws a rectangle with the drawing color
 
 `glua.graphics.draw_rects({ { x, y, w, h }, { ... } ... })` draws multiple rectangles with the drawing color
