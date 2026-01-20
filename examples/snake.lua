@@ -101,7 +101,7 @@ function glua.draw(dt)
 	glua.graphics.set_color(0, 0, 0, 1)
 	glua.graphics.clear()
 	glua.graphics.set_color(1, 0, 0, 1)
-	glua.graphics.fill_rect(apple_x * SIZE, apple_y * SIZE, SIZE, SIZE)
+	glua.graphics.fill_ellipse(apple_x * SIZE + SIZE / 2, apple_y * SIZE + SIZE / 2, SIZE / 2, SIZE / 2)
 	for i, pos in ipairs(snake) do
 		glua.graphics.set_color(0, i / #snake / 2 + 0.5, 0, 1)
 		glua.graphics.fill_rect(pos[1] * SIZE, pos[2] * SIZE, SIZE, SIZE) 

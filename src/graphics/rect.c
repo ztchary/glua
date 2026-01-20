@@ -1,6 +1,6 @@
 #include "graphics/graphics.h"
 
-SDL_FRect *lua_get_rects(lua_State *L, int *n) {
+SDL_FRect *glua_graphics_get_rects(lua_State *L, int *n) {
 	*n = lua_rawlen(L, 1);
 	SDL_FRect *rects = malloc(*n * sizeof(SDL_FRect));
 	for (int i = 0; i < *n; i++) {
@@ -44,7 +44,7 @@ int glua_graphics_draw_rect(lua_State *L) {
 int glua_graphics_draw_rects(lua_State *L) {
 	luaL_checktype(L, 1, LUA_TTABLE);
 	int n;
-	SDL_FRect *rects = lua_get_rects(L, &n);
+	SDL_FRect *rects = glua_graphics_get_rects(L, &n);
 	if (!rects) return 0;
 	SDL_RenderDrawRectsF(renderer, rects, n);
 	free(rects);
@@ -64,7 +64,7 @@ int glua_graphics_fill_rect(lua_State *L) {
 int glua_graphics_fill_rects(lua_State *L) {
 	luaL_checktype(L, 1, LUA_TTABLE);
 	int n;
-	SDL_FRect *rects = lua_get_rects(L, &n);
+	SDL_FRect *rects = glua_graphics_get_rects(L, &n);
 	if (!rects) return 0;
 	SDL_RenderFillRectsF(renderer, rects, n);
 	free(rects);

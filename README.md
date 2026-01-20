@@ -36,13 +36,21 @@ these functions should be defined in your code...
 
 `glua.graphics.clear()` clears the screen with the drawing color
 
-`glua.graphics.draw_rect(x, y, w, h)` draws a rectange with the drawing color
+`glua.graphics.draw_rect(x, y, w, h)` draws a rectangle with the drawing color
 
-`glua.graphics.draw_rects({ { x, y, w, h }, { ... } ... })` draws multiple rectanges with the drawing color
+`glua.graphics.draw_rects({ { x, y, w, h }, { ... } ... })` draws multiple rectangles with the drawing color
 
-`glua.graphics.fill_rect(x, y, w, h)` fills a rectange with the drawing color
+`glua.graphics.fill_rect(x, y, w, h)` fills a rectangle with the drawing color
 
-`glua.graphics.fill_rects({ { x, y, w, h }, { ... } ... })` fills multiple rectanges with the drawing color
+`glua.graphics.fill_rects({ { x, y, w, h }, { ... } ... })` fills multiple rectangles with the drawing color
+
+`glua.graphics.draw_ellipse(x, y, w, h)` draws an ellipse with the drawing color
+
+`glua.graphics.draw_ellipses({ { x, y, w, h }, { ... } ... })` draws multiple ellipses with the drawing color
+
+`glua.graphics.fill_ellipse(x, y, w, h)` fills an ellipse with the drawing color
+
+`glua.graphics.fill_ellipses({ { x, y, w, h }, { ... } ... })` fills multiple ellipses with the drawing color
 
 ## glua.keyboard
 
