@@ -3,10 +3,6 @@
 SDL_Renderer *renderer;
 uint8_t color[4];
 
-void glua_graphics_present() {
-	SDL_RenderPresent(renderer);
-}
-
 bool glua_graphics_init() {
 	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_PRESENTVSYNC);
 	if (renderer) SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
@@ -39,9 +35,24 @@ int glua_graphics_clear(lua_State *L) {
 	return 0;
 }
 
+int glua_graphics_show(lua_State *L) {
+	SDL_RenderPresent(renderer);
+	return 0;
+}
+
+int glua_graphics_draw_rect(lua_State *L);
+int glua_graphics_draw_rects(lua_State *L);
+int glua_graphics_fill_rect(lua_State *L);
+int glua_graphics_fill_rects(lua_State *L);
+int glua_graphics_draw_ellipse(lua_State *L);
+int glua_graphics_draw_ellipses(lua_State *L);
+int glua_graphics_fill_ellipse(lua_State *L);
+int glua_graphics_fill_ellipses(lua_State *L);
+
 static const luaL_Reg glua_graphics_functions[] = {
 	{ "set_color",     glua_graphics_set_color },
 	{ "clear",         glua_graphics_clear },
+	{ "show",          glua_graphics_show },
 	{ "draw_rect",     glua_graphics_draw_rect },
 	{ "draw_rects",    glua_graphics_draw_rects },
 	{ "fill_rect",     glua_graphics_fill_rect },

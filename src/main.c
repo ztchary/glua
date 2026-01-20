@@ -4,7 +4,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_filesystem.h>
 #include "glua/glua.h"
+#include "path.h"
 
 void crash_if(lua_State *L, bool do_crash) {
 	if (!do_crash) return;
@@ -16,16 +18,23 @@ void crash_if(lua_State *L, bool do_crash) {
 
 int main(int argc, char **argv) {
 	if (argc != 2) {
-		fprintf(stderr, "Provide a lua file\n");
+		fprintf(stderr, "Provide a project path\n");
 		return 1;
 	}
+
+	const char *project_path = argv[1];
+	char main_lua[128];
+	char link_path[128];
+
+	path_join(main_lua, project_path, "main.lua");
+	path_join(link_path, project_path, "?.lua");
 
 	lua_State *L = luaL_newstate();
 	luaL_openlibs(L);
 
-	glua_link(L);
+	glua_link(L, link_path);
 
-	crash_if(L, luaL_dofile(L, argv[1]) != 0);
+	crash_if(L, luaL_dofile(L, main_lua) != 0);
 
 	lua_getglobal(L, "glua");
 	lua_getfield(L, -1, "init");
@@ -59,7 +68,6 @@ int main(int argc, char **argv) {
 		lua_pushnumber(L, (float)(cur_tick - last_tick) / 1000.0);
 		crash_if(L, lua_pcall(L, 1, 0, 0) != LUA_OK);
 		lua_pop(L, 1);
-		glua_graphics_present();
 		last_tick = cur_tick;
 	}
 

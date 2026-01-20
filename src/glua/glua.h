@@ -13,5 +13,5 @@ extern bool quit;
 
 bool glua_init();
 
-int glua_link(lua_State *L);
+int glua_link(lua_State *, const char *);
 

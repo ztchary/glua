@@ -1,7 +1,4 @@
-FRAMERATE = 5
-SIZE = 50
-COLS = 15
-ROWS = 10
+local options = require("options")
 
 APPLE_SOUND = {}
 DEATH_SOUND = {}
@@ -13,7 +10,7 @@ end
 
 function glua.init()
 	glua.window.set_name("glua snake")
-	glua.window.set_size(COLS * SIZE, ROWS * SIZE)
+	glua.window.set_size(options.COLS * options.SIZE, options.ROWS * options.SIZE)
 end
 
 local mov_queue
@@ -33,14 +30,14 @@ end
 
 function new_apple()
 	repeat
-		apple_x = math.random(COLS) - 1
-		apple_y = math.random(ROWS) - 1
+		apple_x = math.random(options.COLS) - 1
+		apple_y = math.random(options.ROWS) - 1
 	until not hitting_snake(apple_x, apple_y)
 end
 
 function reset()
 	mov_queue = { { 0, 0 } }
-	snake = { { math.random(COLS) - 1, math.random(ROWS) - 1 } }
+	snake = { { math.random(options.COLS) - 1, math.random(options.ROWS) - 1 } }
 	length = 3
 	new_apple()
 end
@@ -56,7 +53,7 @@ function update()
 		table.remove(snake, 1)
 	end
 
-	if hitting_snake(head_x, head_y) or head_x < 0 or head_x == COLS or head_y < 0 or head_y == ROWS then
+	if hitting_snake(head_x, head_y) or head_x < 0 or head_x == options.COLS or head_y < 0 or head_y == options.ROWS then
 		reset()
 		glua.audio.play_samples(DEATH_SOUND)
 		return
@@ -94,17 +91,17 @@ end
 ts = 0
 function glua.draw(dt)
 	ts = ts + dt
-	if ts > 1/FRAMERATE then
-		update()
-		ts = ts - 1/FRAMERATE
-	end
+	if ts < 1/options.FRAMERATE then return end
+	ts = ts - 1/options.FRAMERATE
+	update()
 	glua.graphics.set_color(0, 0, 0, 1)
 	glua.graphics.clear()
 	glua.graphics.set_color(1, 0, 0, 1)
-	glua.graphics.fill_ellipse(apple_x * SIZE + SIZE / 2, apple_y * SIZE + SIZE / 2, SIZE / 2, SIZE / 2)
+	glua.graphics.fill_ellipse(apple_x * options.SIZE + options.SIZE / 2, apple_y * options.SIZE + options.SIZE / 2, options.SIZE / 2, options.SIZE / 2)
 	for i, pos in ipairs(snake) do
 		glua.graphics.set_color(0, i / #snake / 2 + 0.5, 0, 1)
-		glua.graphics.fill_rect(pos[1] * SIZE, pos[2] * SIZE, SIZE, SIZE) 
+		glua.graphics.fill_rect(pos[1] * options.SIZE, pos[2] * options.SIZE, options.SIZE, options.SIZE) 
 	end
+	glua.graphics.show()
 end
 

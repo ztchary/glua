@@ -29,7 +29,20 @@ static const luaL_Reg glua_modules[] = {
 	{ NULL, NULL }
 };
 
-int glua_link(lua_State *L) {
+void glua_add_path(lua_State* L, const char* path) {
+  lua_getglobal(L, "package");
+  lua_getfield(L, -1, "path");
+  const char* cur_path = lua_tostring(L, -1);
+
+  char new_path[512];
+  snprintf(new_path, sizeof(new_path), "%s;%s", cur_path, path);
+  lua_pushstring(L, new_path);
+  lua_setfield(L, -3, "path");
+  lua_pop(L, 2);
+}
+
+int glua_link(lua_State *L, const char *project_path) {
+	glua_add_path(L, project_path);
 	luaL_newlib(L, glua_functions);
 	for (int i = 0; glua_modules[i].name; i++) {
 		glua_modules[i].func(L);
