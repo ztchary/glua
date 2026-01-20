@@ -44,13 +44,13 @@ these functions should be defined in your code...
 
 `glua.graphics.fill_rects({ { x, y, w, h }, { ... } ... })` fills multiple rectangles with the drawing color
 
-`glua.graphics.draw_ellipse(x, y, w, h)` draws an ellipse with the drawing color
+`glua.graphics.draw_ellipse(x, y, rx, ry)` draws an ellipse with the drawing color
 
-`glua.graphics.draw_ellipses({ { x, y, w, h }, { ... } ... })` draws multiple ellipses with the drawing color
+`glua.graphics.draw_ellipses({ { x, y, rx, ry }, { ... } ... })` draws multiple ellipses with the drawing color
 
-`glua.graphics.fill_ellipse(x, y, w, h)` fills an ellipse with the drawing color
+`glua.graphics.fill_ellipse(x, y, rx, ry)` fills an ellipse with the drawing color
 
-`glua.graphics.fill_ellipses({ { x, y, w, h }, { ... } ... })` fills multiple ellipses with the drawing color
+`glua.graphics.fill_ellipses({ { x, y, rx, ry }, { ... } ... })` fills multiple ellipses with the drawing color
 
 ## glua.keyboard
 
