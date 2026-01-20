@@ -32,6 +32,8 @@ these functions should be defined in your code...
 
 `glua.graphics.set_color(r, g, b, a)` sets the drawing color, values are 0.0 .. 1.0
 
+`glua.graphics.set_color({ r, g, b, a })` color can also be supplied as an array
+
 `glua.graphics.clear()` clears the screen with the drawing color
 
 `glua.graphics.draw_rect(x, y, w, h)` draws a rectange with the drawing color

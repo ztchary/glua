@@ -13,11 +13,24 @@ bool glua_graphics_init() {
 }
 
 int glua_graphics_set_color(lua_State *L) {
-	int r = (int)(luaL_checknumber(L, 1) * 255.0);
-	int g = (int)(luaL_checknumber(L, 2) * 255.0);
-	int b = (int)(luaL_checknumber(L, 3) * 255.0);
-	int a = (int)(luaL_checknumber(L, 4) * 255.0);
-	SDL_SetRenderDrawColor(renderer, r, g, b, a);
+	int color[4];
+	if (lua_istable(L, 1)) {
+		if (lua_rawlen(L, 1) != 4) {
+			luaL_error(L, "Color must have 4 values");
+			return 0;
+		}
+		for (int i = 0; i < 4; i++) {
+			lua_rawgeti(L, 1, i + 1);
+			color[i] = (int)(lua_tonumber(L, 2) * 255.0);
+			lua_pop(L, 1);
+		}
+	} else {
+		color[0] = (int)(luaL_checknumber(L, 1) * 255.0);
+		color[1] = (int)(luaL_checknumber(L, 2) * 255.0);
+		color[2] = (int)(luaL_checknumber(L, 3) * 255.0);
+		color[3] = (int)(luaL_checknumber(L, 4) * 255.0);
+	}
+	SDL_SetRenderDrawColor(renderer, color[0], color[1], color[2], color[3]);
 	return 0;
 }
 
