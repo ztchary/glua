@@ -1,7 +1,9 @@
 CC=cc
 CFLAGS=-Wall -Werror
-LIBS=-llua -lSDL2
+LIBS=-llua -lSDL2 -Isrc
+SOURCES=$(shell find src -name "*.c")
+INCLUDES=$(shell find src -name "*.h")
 
-glua: glua.c
-	$(CC) $(CFLAGS) -o glua glua.c $(LIBS)
+glua: $(SOURCES) $(INCLUDES)
+	$(CC) $(CFLAGS) -o glua $(SOURCES) $(LIBS)
 
