@@ -5,7 +5,10 @@ local PLAYER_SIZE = 24
 local CELL_SIZE = 60
 local FIXED_XP = 20
 
-if not glua.init(WIDTH, HEIGHT) then glua.quit() end
+function glua.init()
+	glua.window.set_name("Glua survivors")
+	glua.window.set_size(WIDTH, HEIGHT)
+end
 
 -- ==========================================
 -- 1. UTILITIES & FONT
@@ -22,7 +25,7 @@ local FONT = {
 	[" "]={0,0,0,0,0}, ["."]={0,0,0,0,2}, ["%"]={5,2,2,1,5}, ["+"]={0,2,7,2,0}
 }
 function draw_text(str, x, y, s, r, g, b, a)
-	glua.set_color(r or 1, g or 1, b or 1, a or 1)
+	glua.graphics.set_color(r or 1, g or 1, b or 1, a or 1)
 	local rects = {}
 	str = tostring(str):upper()
 	for i = 1, #str do
@@ -33,7 +36,7 @@ function draw_text(str, x, y, s, r, g, b, a)
 			end
 		end end
 	end
-	glua.fill_rects(rects)
+	glua.graphics.fill_rects(rects)
 end
 function dist(x1, y1, x2, y2) return math.sqrt((x2-x1)^2 + (y2-y1)^2) end
 
@@ -76,7 +79,7 @@ for i=1,150 do table.insert(weather.rain, {x=math.random(WIDTH), y=math.random(H
 local enemies, bullets, enemy_bullets, gems, pickups, popups, splats, afterimages, mines, blackholes, meteors = {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}
 local destroyed_crates, visited_merchants = {}, {}
 local footprints, shockwaves = {}, {}
-local keys, perks = {}, {}
+local perks = {}
 local cam_x, cam_y, shake, kills, time, wave, day_cycle = 0, 0, 0, 0, 0, 1, 0
 local spawn_timer, combo, combo_timer, freeze_timer, intro_timer, tutorial_alpha = 0, 0, 0, 0, 2.0, 5.0
 local dps_counter, dps_timer, slow_mo_timer = 0, 0, 0
@@ -91,7 +94,7 @@ for i=1,8000 do table.insert(SOUNDS.BOOM, (math.random()*2-1)*(1-i/5000)) end
 for i=1,8000 do table.insert(SOUNDS.LEVEL, math.sin(i*(0.1+math.floor(i/2000)*0.05))*(1-i/8000)) end
 for i=1,1000 do table.insert(SOUNDS.CRIT, math.sin(i*0.8)*(1-i/1000)) end
 for i=1,2000 do table.insert(SOUNDS.RAIN, (math.random()*0.2-0.1)) end -- White noise
-function play_snd(k) if SOUNDS[k] then glua.play_samples(SOUNDS[k]) end end
+function play_snd(k) if SOUNDS[k] then glua.audio.play_samples(SOUNDS[k]) end end
 
 -- 3. PERKS
 function generate_perks()
@@ -183,7 +186,7 @@ end
 function update(dt)
 	if state == "INTRO" then
 		intro_timer = intro_timer - dt
-		if keys[glua.keycode.KEY_H] then hard_mode = true end
+		if glua.keyboard.is_pressed("h") then hard_mode = true end
 		if intro_timer < 0 then state = "PLAY" end
 		return
 	end
@@ -252,10 +255,10 @@ function update(dt)
 	if player.hp > player.max_hp then player.shield = math.min(player.max_shield, player.shield + dt) end
 
 	local vx, vy = 0, 0
-	if keys[glua.keycode.KEY_UP] then vy = -1 end
-	if keys[glua.keycode.KEY_DOWN] then vy = 1 end
-	if keys[glua.keycode.KEY_LEFT] then vx = -1 end
-	if keys[glua.keycode.KEY_RIGHT] then vx = 1 end
+	if glua.keyboard.is_pressed("up") then vy = -1 end
+	if glua.keyboard.is_pressed("down") then vy = 1 end
+	if glua.keyboard.is_pressed("left") then vx = -1 end
+	if glua.keyboard.is_pressed("right") then vx = 1 end
 	
 	local speed = player.speed * (player.dash_timer > 0 and 3 or 1)
 	if combo > 20 then speed = speed * 1.2 end
@@ -723,41 +726,39 @@ function take_damage(amt, source)
 	play_snd("HIT")
 end
 
-glua.on_key(function(k, down)
-	keys[k] = down
-	if not down then return end
-	if state=="PLAY" and k==glua.keycode.KEY_P then state="PAUSE"
-	elseif state=="PAUSE" and k==glua.keycode.KEY_P then state="PLAY"
+function glua.event.on_keydown(k)
+	if state=="PLAY" and k=="p" then state="PAUSE"
+	elseif state=="PAUSE" and k=="p" then state="PLAY"
 	elseif state=="LEVELUP" then
-		if k==glua.keycode.KEY_1 then apply_perk(1)
-		elseif k==glua.keycode.KEY_2 then apply_perk(2)
-		elseif k==glua.keycode.KEY_3 then apply_perk(3)
-		elseif k==glua.keycode.KEY_R and player.gold >= player.reroll_cost then 
+		if k=="1" then apply_perk(1)
+		elseif k=="2" then apply_perk(2)
+		elseif k=="3" then apply_perk(3)
+		elseif k=="r" and player.gold >= player.reroll_cost then 
 			player.gold = player.gold - player.reroll_cost; player.reroll_cost = player.reroll_cost + 5; generate_perks() 
 		end
 	end
-	if k==glua.keycode.KEY_SPACE and state=="PLAY" and player.dash_cd<=0 then
+	if k=="space" and state=="PLAY" and player.dash_cd<=0 then
 		player.dash_timer=0.2; player.dash_cd=1.2; player.i_frames=0.3
 		play_snd("DASH")
 	end
-	if k==glua.keycode.KEY_Q then glua.quit() end
-	if k==glua.keycode.KEY_T then auto_aim = not auto_aim end
-	if k==glua.keycode.KEY_LSHIFT and player.active_cd <= 0 then
+	if k=="q" then glua.quit() end
+	if k=="t" then auto_aim = not auto_aim end
+	if k=="\\" and player.active_cd <= 0 then
 		player.hp = math.min(player.max_hp, player.hp + 20)
 		add_popup(player.x, player.y, "HEAL!", {0,1,0}, 3); player.active_cd = player.active_max; slow_mo_timer = 3.0
 	end
-end)
+end
 
 -- ==========================================
 -- 5. RENDER
 -- ==========================================
-glua.set_draw(function(dt)
+function glua.draw(dt)
 	update(dt)
 	
-	if weather.flash > 0 then glua.set_color(1,1,1,weather.flash); glua.fill_rects({{0,0,WIDTH,HEIGHT}}); return end
+	if weather.flash > 0 then glua.graphics.set_color(1,1,1,weather.flash); glua.graphics.fill_rects({{0,0,WIDTH,HEIGHT}}); return end
 	
 	if state == "INTRO" then
-		glua.set_color(0,0,0,1); glua.fill_rects({{0,0,WIDTH,HEIGHT}})
+		glua.graphics.set_color(0,0,0,1); glua.graphics.fill_rects({{0,0,WIDTH,HEIGHT}})
 		local p = intro_timer / 2.0; draw_text("GLUA SURVIVORS", 200, 250 - p*100, 5, 1, 1, 1, 1-p)
 		draw_text("PRESS H FOR HARD MODE", 250, 400, 2, 1, 0, 0, 1-p)
 		return
@@ -766,14 +767,14 @@ glua.set_draw(function(dt)
 	local dv = (day_cycle + 1) / 2
 	local bg = {0.05 + 0.1*dv, 0.05 + 0.05*dv, 0.1 - 0.05*dv}
 	if blood_moon then bg = {0.2, 0, 0} elseif weather.type == "RAIN" then bg={0.04, 0.04, 0.06} elseif weather.type == "STORM" then bg={0.02, 0.02, 0.03} end
-	glua.set_color(bg[1], bg[2], bg[3], 1); glua.clear()
+	glua.graphics.set_color(bg[1], bg[2], bg[3], 1); glua.graphics.clear()
 	
 	local pulse = 0.1 + math.sin(time*4)*0.02
-	glua.set_color(pulse, pulse, pulse, 1)
-	for i=0, 9 do glua.fill_rects({{0, i*100-cam_y%100, WIDTH, 2}, {i*100-cam_x%100, 0, 2, HEIGHT}}) end
+	glua.graphics.set_color(pulse, pulse, pulse, 1)
+	for i=0, 9 do glua.graphics.fill_rects({{0, i*100-cam_y%100, WIDTH, 2}, {i*100-cam_x%100, 0, 2, HEIGHT}}) end
 	
 	if math.abs(player.x) > 2000 or math.abs(player.y) > 2000 then
-		glua.set_color(1,0,1,0.2 + math.random()*0.1); glua.fill_rects({{0,0,WIDTH,HEIGHT}})
+		glua.graphics.set_color(1,0,1,0.2 + math.random()*0.1); glua.graphics.fill_rects({{0,0,WIDTH,HEIGHT}})
 		if math.random(10)==1 then draw_text("VOID", math.random(WIDTH), math.random(HEIGHT), 5, 1, 0, 1) end
 	end
 	
@@ -786,12 +787,12 @@ glua.set_draw(function(dt)
 		local t = get_env_at(cx, cy)
 		local x, y = cx*CELL_SIZE, cy*CELL_SIZE
 		if t == "TREE" then
-			glua.set_color(0,0,0,0.3); glua.fill_rects({{x-cam_x+10, y-cam_y+10, 40, 40}})
+			glua.graphics.set_color(0,0,0,0.3); glua.graphics.fill_rects({{x-cam_x+10, y-cam_y+10, 40, 40}})
 			table.insert(bases, {x=x+25, y=y+30, w=10, h=30, c={0.4, 0.2, 0}})
 			local sway = math.sin(time*2 + cx)*5
 			table.insert(tops, {x=x+10+sway, y=y+10, w=40, h=40, c={0, 0.6, 0, 0.9}})
 		elseif t == "ROCK" then
-			glua.set_color(0,0,0,0.3); glua.fill_rects({{x-cam_x+15, y-cam_y+25, 30, 20}})
+			glua.graphics.set_color(0,0,0,0.3); glua.graphics.fill_rects({{x-cam_x+15, y-cam_y+25, 30, 20}})
 			table.insert(bases, {x=x+15, y=y+20, w=30, h=25, c={0.5, 0.5, 0.5}})
 		elseif t == "CRATE" and not destroyed_crates[cx..","..cy] then
 			table.insert(bases, {x=x+10, y=y+10, w=40, h=40, c={0.6, 0.4, 0.2}})
@@ -814,76 +815,76 @@ glua.set_draw(function(dt)
 		end
 	end end
 	
-	for _,b in ipairs(bases) do local c=b.c; glua.set_color(c[1],c[2],c[3],c[4] or 1); glua.fill_rects({{b.x-cam_x, b.y-cam_y, b.w, b.h}}) end
+	for _,b in ipairs(bases) do local c=b.c; glua.graphics.set_color(c[1],c[2],c[3],c[4] or 1); glua.graphics.fill_rects({{b.x-cam_x, b.y-cam_y, b.w, b.h}}) end
 	
-	for i=#footprints,1,-1 do local f=footprints[i]; f.life=f.life-dt; glua.set_color(0,0,0,f.life/4); glua.fill_rects({{f.x-cam_x, f.y-cam_y, 4, 4}}); if f.life<0 then table.remove(footprints,i) end end
-	for i=#splats,1,-1 do local s=splats[i]; glua.set_color(0.4, 0, 0, s.life/10); glua.fill_rects({{s.x-cam_x, s.y-cam_y, 20, 20}}) end
+	for i=#footprints,1,-1 do local f=footprints[i]; f.life=f.life-dt; glua.graphics.set_color(0,0,0,f.life/4); glua.graphics.fill_rects({{f.x-cam_x, f.y-cam_y, 4, 4}}); if f.life<0 then table.remove(footprints,i) end end
+	for i=#splats,1,-1 do local s=splats[i]; glua.graphics.set_color(0.4, 0, 0, s.life/10); glua.graphics.fill_rects({{s.x-cam_x, s.y-cam_y, 20, 20}}) end
 	for _,m in ipairs(mines) do 
-		if m.enemy then glua.set_color(0,1,0,0.8) else glua.set_color(0.8,0.4,0,1) end
-		glua.fill_rects({{m.x-cam_x, m.y-cam_y, 14, 14}}) 
+		if m.enemy then glua.graphics.set_color(0,1,0,0.8) else glua.graphics.set_color(0.8,0.4,0,1) end
+		glua.graphics.fill_rects({{m.x-cam_x, m.y-cam_y, 14, 14}}) 
 	end
 	for _,g in ipairs(gems) do 
-		if g.gold then glua.set_color(1,1,0,1) else glua.set_color(g.col[1],g.col[2],g.col[3],1) end
-		glua.fill_rects({{g.x-cam_x, g.y-cam_y, g.sz, g.sz}}) 
+		if g.gold then glua.graphics.set_color(1,1,0,1) else glua.graphics.set_color(g.col[1],g.col[2],g.col[3],1) end
+		glua.graphics.fill_rects({{g.x-cam_x, g.y-cam_y, g.sz, g.sz}}) 
 	end
 	for _,p in ipairs(pickups) do
 		local c = {1,1,1}; if p.type=="MEDKIT" then c={1,0,0} elseif p.type=="NUKE" then c={1,0.5,0} elseif p.type=="VACUUM" then c={1,0,1} elseif p.type=="MERCHANT" then c={1,1,0} end
-		glua.set_color(c[1],c[2],c[3],1); glua.fill_rects({{p.x-cam_x, p.y-cam_y, 16, 16}})
+		glua.graphics.set_color(c[1],c[2],c[3],1); glua.graphics.fill_rects({{p.x-cam_x, p.y-cam_y, 16, 16}})
 	end
 	
-	for _,bh in ipairs(blackholes) do glua.set_color(0,0,0,1); glua.fill_rects({{bh.x-cam_x-20, bh.y-cam_y-20, 40, 40}}) end
-	for _,m in ipairs(meteors) do glua.set_color(1,0,0,0.3); glua.fill_rects({{m.x-cam_x-40, m.y-cam_y-40, 80, 80}}) end
+	for _,bh in ipairs(blackholes) do glua.graphics.set_color(0,0,0,1); glua.graphics.fill_rects({{bh.x-cam_x-20, bh.y-cam_y-20, 40, 40}}) end
+	for _,m in ipairs(meteors) do glua.graphics.set_color(1,0,0,0.3); glua.graphics.fill_rects({{m.x-cam_x-40, m.y-cam_y-40, 80, 80}}) end
 
 	-- Garlic Aura
-	if player.garlic then glua.set_color(1,1,1,0.1); glua.fill_rects({{player.x-cam_x-80, player.y-cam_y-80, 160, 160}}) end
+	if player.garlic then glua.graphics.set_color(1,1,1,0.1); glua.graphics.fill_rects({{player.x-cam_x-80, player.y-cam_y-80, 160, 160}}) end
 
 	for _,e in ipairs(enemies) do
 		if e.type ~= "INVISIBLE" or dist(e.x,e.y,player.x,player.y) < 100 then
 			local sz = (e.boss and 60 or 24) * (e.squash or 1)
-			glua.set_color(0,0,0,0.4); glua.fill_rects({{e.x-cam_x+4, e.y-cam_y+4, sz, sz}})
-			if e.flash>0 then glua.set_color(1,1,1,1)
-			elseif e.type=="BOMBER" then glua.set_color(1, 0.5, 0, 1)
-			elseif e.type=="SHOOTER" then glua.set_color(0.8, 0.4, 0, 1)
-			elseif e.type=="SWARMER" then glua.set_color(0.6, 0.3, 0.3, 1)
-			elseif e.type=="HEALER" then glua.set_color(0, 1, 0, 1)
-			elseif e.type=="SPLITTER" then glua.set_color(0.5, 0, 1, 1)
-			elseif e.type=="INVISIBLE" then glua.set_color(1,1,1,0.2)
-			elseif e.type=="CHARGER" then glua.set_color(0.4, 0.2, 0, 1)
-			elseif e.type=="GHOST" then glua.set_color(0.8, 0.8, 1, 0.5)
-			elseif e.type=="SLIME" then glua.set_color(0, 0.8, 0, 1)
-			elseif e.boss then glua.set_color(0.9,0,0,1)
-			else glua.set_color(0.6,0.2,0.2,1) end
-			glua.fill_rects({{e.x-cam_x, e.y-cam_y, sz, sz}})
+			glua.graphics.set_color(0,0,0,0.4); glua.graphics.fill_rects({{e.x-cam_x+4, e.y-cam_y+4, sz, sz}})
+			if e.flash>0 then glua.graphics.set_color(1,1,1,1)
+			elseif e.type=="BOMBER" then glua.graphics.set_color(1, 0.5, 0, 1)
+			elseif e.type=="SHOOTER" then glua.graphics.set_color(0.8, 0.4, 0, 1)
+			elseif e.type=="SWARMER" then glua.graphics.set_color(0.6, 0.3, 0.3, 1)
+			elseif e.type=="HEALER" then glua.graphics.set_color(0, 1, 0, 1)
+			elseif e.type=="SPLITTER" then glua.graphics.set_color(0.5, 0, 1, 1)
+			elseif e.type=="INVISIBLE" then glua.graphics.set_color(1,1,1,0.2)
+			elseif e.type=="CHARGER" then glua.graphics.set_color(0.4, 0.2, 0, 1)
+			elseif e.type=="GHOST" then glua.graphics.set_color(0.8, 0.8, 1, 0.5)
+			elseif e.type=="SLIME" then glua.graphics.set_color(0, 0.8, 0, 1)
+			elseif e.boss then glua.graphics.set_color(0.9,0,0,1)
+			else glua.graphics.set_color(0.6,0.2,0.2,1) end
+			glua.graphics.fill_rects({{e.x-cam_x, e.y-cam_y, sz, sz}})
 			
-			if e.shield then glua.set_color(0,0.5,1,1); glua.fill_rects({{e.x-cam_x-2, e.y-cam_y-2, sz+4, sz+4}}) end
+			if e.shield then glua.graphics.set_color(0,0.5,1,1); glua.graphics.fill_rects({{e.x-cam_x-2, e.y-cam_y-2, sz+4, sz+4}}) end
 			local mhp = e.max_hp or e.hp or 1
-			if e.hp < mhp then glua.set_color(1,0,0,1); glua.fill_rects({{e.x-cam_x, e.y-cam_y-5, sz*(e.hp/mhp), 3}}) end
-			if e.elite then glua.set_color(1,1,0,1); glua.fill_rects({{e.x-cam_x+sz/2-2, e.y-cam_y-8, 4, 4}}) end -- Yellow Health Bar for Elite
+			if e.hp < mhp then glua.graphics.set_color(1,0,0,1); glua.graphics.fill_rects({{e.x-cam_x, e.y-cam_y-5, sz*(e.hp/mhp), 3}}) end
+			if e.elite then glua.graphics.set_color(1,1,0,1); glua.graphics.fill_rects({{e.x-cam_x+sz/2-2, e.y-cam_y-8, 4, 4}}) end -- Yellow Health Bar for Elite
 			
 			-- Turret Laser
 			if (e.type=="SHOOTER" or e.type=="TURRET") and dist(e.x,e.y,player.x,player.y)<500 then
-				glua.set_color(1,0,0,0.3); local dx, dy = player.x-e.x, player.y-e.y
-				glua.fill_rects({{e.x-cam_x, e.y-cam_y, dx, 1}, {e.x-cam_x, e.y-cam_y, 1, dy}})
+				glua.graphics.set_color(1,0,0,0.3); local dx, dy = player.x-e.x, player.y-e.y
+				glua.graphics.fill_rects({{e.x-cam_x, e.y-cam_y, dx, 1}, {e.x-cam_x, e.y-cam_y, 1, dy}})
 			end
 		end
 	end
 	
 	if player.i_frames<=0 or math.floor(time*15)%2==0 then
-		glua.set_color(0,0,0,0.4); glua.fill_rects({{player.x-cam_x+4, player.y-cam_y+4, 24, 24}})
-		glua.set_color(1,1,1,1); glua.fill_rects({{player.x-cam_x, player.y-cam_y, 24, 24}})
-		glua.set_color(0,0,0,1); glua.fill_rects({{player.x-cam_x+8+player.facing_x*4, player.y-cam_y+8, 4, 4}, {player.x-cam_x+16+player.facing_x*4, player.y-cam_y+8, 4, 4}})
-		if player.orb_shield then glua.set_color(0,1,1,0.5); glua.fill_rects({{player.x-cam_x-10, player.y-cam_y-10, 44, 44}}) end
+		glua.graphics.set_color(0,0,0,0.4); glua.graphics.fill_rects({{player.x-cam_x+4, player.y-cam_y+4, 24, 24}})
+		glua.graphics.set_color(1,1,1,1); glua.graphics.fill_rects({{player.x-cam_x, player.y-cam_y, 24, 24}})
+		glua.graphics.set_color(0,0,0,1); glua.graphics.fill_rects({{player.x-cam_x+8+player.facing_x*4, player.y-cam_y+8, 4, 4}, {player.x-cam_x+16+player.facing_x*4, player.y-cam_y+8, 4, 4}})
+		if player.orb_shield then glua.graphics.set_color(0,1,1,0.5); glua.graphics.fill_rects({{player.x-cam_x-10, player.y-cam_y-10, 44, 44}}) end
 		-- Active Item Ring
 		local ap = 1 - (player.active_cd / player.active_max)
-		if ap > 0 then glua.set_color(0,1,0,0.3); glua.fill_rects({{player.x-cam_x-2, player.y-cam_y+26, 28*ap, 2}}) end
+		if ap > 0 then glua.graphics.set_color(0,1,0,0.3); glua.graphics.fill_rects({{player.x-cam_x-2, player.y-cam_y+26, 28*ap, 2}}) end
 	end
 	
-	for _,a in ipairs(afterimages) do glua.set_color(1,1,1,a.life); glua.fill_rects({{a.x-cam_x, a.y-cam_y, 24, 24}}) end
+	for _,a in ipairs(afterimages) do glua.graphics.set_color(1,1,1,a.life); glua.graphics.fill_rects({{a.x-cam_x, a.y-cam_y, 24, 24}}) end
 	for _,t in ipairs(tops) do 
 		local c=t.c; local alpha = c[4] or 1
 		-- Tree Transparency
 		if dist(player.x, player.y, t.x+20, t.y+20) < 60 then alpha = 0.4 end
-		glua.set_color(c[1],c[2],c[3],alpha); glua.fill_rects({{t.x-cam_x, t.y-cam_y, t.w, t.h}}) 
+		glua.graphics.set_color(c[1],c[2],c[3],alpha); glua.graphics.fill_rects({{t.x-cam_x, t.y-cam_y, t.w, t.h}}) 
 	end
 
 	for _,b in ipairs(bullets) do
@@ -894,54 +895,54 @@ glua.set_draw(function(dt)
 		elseif b.type=="MISSILE" then col={1,0,0,1}
 		elseif b.type=="PETLASER" then col={1,0,1,1} 
 		elseif b.type=="DAGGER" then col={0.8,0.8,0.8,1} end
-		glua.set_color(col[1],col[2],col[3],col[4])
+		glua.graphics.set_color(col[1],col[2],col[3],col[4])
 		local sz = (b.type=="POISON" and 40 or 10)
-		glua.fill_rects({{b.x-cam_x, b.y-cam_y, sz, sz}})
+		glua.graphics.fill_rects({{b.x-cam_x, b.y-cam_y, sz, sz}})
 	end
-	glua.set_color(1,0,0,1); for _,b in ipairs(enemy_bullets) do glua.fill_rects({{b.x-cam_x, b.y-cam_y, 12, 12}}) end
+	glua.graphics.set_color(1,0,0,1); for _,b in ipairs(enemy_bullets) do glua.graphics.fill_rects({{b.x-cam_x, b.y-cam_y, 12, 12}}) end
 	
 	if player.saws > 0 then
-		glua.set_color(0.9, 0.9, 0.9, 1)
+		glua.graphics.set_color(0.9, 0.9, 0.9, 1)
 		for i=1, player.saws do
 			local a = (time * 3) + (i * (6.28/player.saws)); local sx, sy = player.x + math.cos(a)*70*player.area, player.y + math.sin(a)*70*player.area
-			glua.fill_rects({{sx-cam_x, sy-cam_y, 16*player.area, 16*player.area}})
+			glua.graphics.fill_rects({{sx-cam_x, sy-cam_y, 16*player.area, 16*player.area}})
 		end
 	end
 
 	if weather.type == "RAIN" or weather.type == "STORM" then
 		if #env_bolts > 0 then
-			glua.set_color(0.8, 0.9, 1.0, 0.5)
+			glua.graphics.set_color(0.8, 0.9, 1.0, 0.5)
 			for _, b in ipairs(env_bolts) do for _, s in ipairs(b.segs) do
-				local len = math.max(1, math.abs(s.y2 - s.y1)); glua.fill_rects({{s.x1, s.y1, 2, len}, {s.x1, s.y2, s.x2-s.x1, 2}})
+				local len = math.max(1, math.abs(s.y2 - s.y1)); glua.graphics.fill_rects({{s.x1, s.y1, 2, len}, {s.x1, s.y2, s.x2-s.x1, 2}})
 			end end
 		end
-		glua.set_color(0.6, 0.6, 1, 0.3)
+		glua.graphics.set_color(0.6, 0.6, 1, 0.3)
 		local rr = {}; local speed = (weather.type=="STORM" and 25 or 15); local slant = (weather.type=="STORM" and 5 or 2)
 		for i, r in ipairs(rain_drops) do
 			r.y = (r.y + speed) % HEIGHT; r.x = (r.x - slant) % WIDTH; table.insert(rr, {r.x, r.y, 2, r.s})
 		end
-		glua.fill_rects(rr)
-		glua.set_color(0,0,0, weather.type=="STORM" and 0.4 or 0.2); glua.fill_rects({{0,0,WIDTH,HEIGHT}})
+		glua.graphics.fill_rects(rr)
+		glua.graphics.set_color(0,0,0, weather.type=="STORM" and 0.4 or 0.2); glua.graphics.fill_rects({{0,0,WIDTH,HEIGHT}})
 		-- Splashes
-		glua.set_color(0.7,0.7,1,0.5)
-		for _,s in ipairs(weather.splash) do glua.fill_rects({{s.x, s.y-5, 4, 2}}) end
+		glua.graphics.set_color(0.7,0.7,1,0.5)
+		for _,s in ipairs(weather.splash) do glua.graphics.fill_rects({{s.x, s.y-5, 4, 2}}) end
 	end
 	
-	for _,s in ipairs(shockwaves) do glua.set_color(1,1,1,s.life); glua.fill_rects({{s.x-cam_x-s.r, s.y-cam_y-s.r, s.r*2, s.r*2}}) end
+	for _,s in ipairs(shockwaves) do glua.graphics.set_color(1,1,1,s.life); glua.graphics.fill_rects({{s.x-cam_x-s.r, s.y-cam_y-s.r, s.r*2, s.r*2}}) end
 
 	for _,p in ipairs(popups) do draw_text(p.txt, p.x-cam_x, p.y-cam_y, p.size, p.col[1], p.col[2], p.col[3], p.life/p.max_life) end
 	if tutorial_alpha > 0 then draw_text("WASD MOVE / SPACE DASH", 150, 400, 3, 1, 1, 1, tutorial_alpha/5) end
 
-	glua.set_color(0,0,0,0.4); glua.fill_rects({{0,0,WIDTH,10},{0,HEIGHT-10,WIDTH,10},{0,0,10,HEIGHT},{WIDTH-10,0,10,HEIGHT}})
-	if player.hp < player.max_hp*0.2 then glua.set_color(1,0,0,0.2 + math.sin(time*10)*0.1); glua.fill_rects({{0,0,WIDTH,HEIGHT}}) end
+	glua.graphics.set_color(0,0,0,0.4); glua.graphics.fill_rects({{0,0,WIDTH,10},{0,HEIGHT-10,WIDTH,10},{0,0,10,HEIGHT},{WIDTH-10,0,10,HEIGHT}})
+	if player.hp < player.max_hp*0.2 then glua.graphics.set_color(1,0,0,0.2 + math.sin(time*10)*0.1); glua.graphics.fill_rects({{0,0,WIDTH,HEIGHT}}) end
 
-	glua.set_color(0,0,0,0.8); glua.fill_rects({{WIDTH/2-102, HEIGHT-32, 204, 24}})
-	glua.set_color(1,0,0,1); glua.fill_rects({{WIDTH/2-100, HEIGHT-30, 200*(player.hp/player.max_hp), 20}})
-	if player.shield > 0 then glua.set_color(0.3,0.6,1,0.6); glua.fill_rects({{WIDTH/2-100, HEIGHT-30, 200*(player.shield/player.max_shield), 20}}) end
-	glua.set_color(0,0.5,1,1); glua.fill_rects({{0,0,WIDTH*(player.exp/FIXED_XP), 8}})
+	glua.graphics.set_color(0,0,0,0.8); glua.graphics.fill_rects({{WIDTH/2-102, HEIGHT-32, 204, 24}})
+	glua.graphics.set_color(1,0,0,1); glua.graphics.fill_rects({{WIDTH/2-100, HEIGHT-30, 200*(player.hp/player.max_hp), 20}})
+	if player.shield > 0 then glua.graphics.set_color(0.3,0.6,1,0.6); glua.graphics.fill_rects({{WIDTH/2-100, HEIGHT-30, 200*(player.shield/player.max_shield), 20}}) end
+	glua.graphics.set_color(0,0.5,1,1); glua.graphics.fill_rects({{0,0,WIDTH*(player.exp/FIXED_XP), 8}})
 	
-	glua.set_color(1,1,0,1); glua.fill_rects({{WIDTH/2-50, HEIGHT-50, 100*(1-(player.dash_cd/1.2)), 4}})
-	glua.set_color(0,1,0,1); glua.fill_rects({{WIDTH/2-50, HEIGHT-60, 100*(1-(player.active_cd/player.active_max)), 4}})
+	glua.graphics.set_color(1,1,0,1); glua.graphics.fill_rects({{WIDTH/2-50, HEIGHT-50, 100*(1-(player.dash_cd/1.2)), 4}})
+	glua.graphics.set_color(0,1,0,1); glua.graphics.fill_rects({{WIDTH/2-50, HEIGHT-60, 100*(1-(player.active_cd/player.active_max)), 4}})
 
 	draw_text("LVL "..player.lvl, 10, 15, 3)
 	draw_text("GOLD "..player.gold, 10, 45, 3, 1, 1, 0)
@@ -953,23 +954,23 @@ glua.set_draw(function(dt)
 	draw_text("TIME "..math.floor(time), WIDTH/2-60, 15, 3)
 	
 	for _, e in ipairs(enemies) do if e.boss then
-		glua.set_color(0,0,0,0.8); glua.fill_rects({{200, 50, 400, 20}})
-		glua.set_color(1,0,0,1); glua.fill_rects({{200, 50, 400*(e.hp/e.max_hp), 20}})
+		glua.graphics.set_color(0,0,0,0.8); glua.graphics.fill_rects({{200, 50, 400, 20}})
+		glua.graphics.set_color(1,0,0,1); glua.graphics.fill_rects({{200, 50, 400*(e.hp/e.max_hp), 20}})
 		draw_text("BOSS", 370, 30, 2, 1, 0, 0)
 	end end
 
 	local mx, my, ms = WIDTH-110, HEIGHT-110, 100
-	glua.set_color(0,0,0,0.7); glua.fill_rects({{mx, my, ms, ms}})
-	glua.set_color(0,1,1,1); glua.fill_rects({{mx+ms/2-2, my+ms/2-2, 4, 4}})
+	glua.graphics.set_color(0,0,0,0.7); glua.graphics.fill_rects({{mx, my, ms, ms}})
+	glua.graphics.set_color(0,1,1,1); glua.graphics.fill_rects({{mx+ms/2-2, my+ms/2-2, 4, 4}})
 	local mr = {}
 	for _, e in ipairs(enemies) do
 		local ex, ey = (e.x-player.x)/20, (e.y-player.y)/20
 		if math.abs(ex)<ms/2 and math.abs(ey)<ms/2 then table.insert(mr, {mx+ms/2+ex, my+ms/2+ey, 3, 3}) end
 	end
-	glua.set_color(1,0,0,0.8); glua.fill_rects(mr)
+	glua.graphics.set_color(1,0,0,0.8); glua.graphics.fill_rects(mr)
 
 	if state=="LEVELUP" then
-		glua.set_color(0,0,0,0.85); glua.fill_rects({{0,0,WIDTH,HEIGHT}})
+		glua.graphics.set_color(0,0,0,0.85); glua.graphics.fill_rects({{0,0,WIDTH,HEIGHT}})
 		local scale = 1 + math.sin(time*5)*0.1
 		draw_text("LEVEL UP", 320 - (scale*10), 120, 4*scale, 1,1,0)
 		draw_text("R TO REROLL ("..player.reroll_cost.."G)", 300, 450, 2, 1, 1, 0)
@@ -978,14 +979,14 @@ glua.set_draw(function(dt)
 			draw_text(i..". "..p.n.." ("..p.r..")", 150, 200+i*60, 3, c[1], c[2], c[3])
 		end
 	elseif state=="PAUSE" then
-		glua.set_color(0,0,0,0.7); glua.fill_rects({{0,0,WIDTH,HEIGHT}})
+		glua.graphics.set_color(0,0,0,0.7); glua.graphics.fill_rects({{0,0,WIDTH,HEIGHT}})
 		draw_text("PAUSED", 330, 280, 4)
 	elseif state=="WIN" then
-		glua.set_color(1,1,1,1); glua.fill_rects({{0,0,WIDTH,HEIGHT}})
+		glua.graphics.set_color(1,1,1,1); glua.graphics.fill_rects({{0,0,WIDTH,HEIGHT}})
 		draw_text("VICTORY!", 280, 250, 5, 0,0,0)
 	elseif state=="GAMEOVER" then
-		glua.set_color(0,0,0,1); glua.fill_rects({{0,0,WIDTH,HEIGHT}})
+		glua.graphics.set_color(0,0,0,1); glua.graphics.fill_rects({{0,0,WIDTH,HEIGHT}})
 		draw_text("GAME OVER", 280, 250, 5, 1,0,0)
 		if killer_name ~= "" then draw_text("KILLED BY: "..killer_name, 300, 350, 2, 1, 1, 1) end
 	end
-end)
+end

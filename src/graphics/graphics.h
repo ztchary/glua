@@ -6,6 +6,8 @@
 #include <stdlib.h>
 #include "window/window.h"
 
+extern SDL_Renderer *renderer;
+
 void glua_graphics_present();
 
 bool glua_graphics_init();
