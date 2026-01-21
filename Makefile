@@ -1,5 +1,5 @@
 CC=cc
-CFLAGS=-Wall -Werror
+CFLAGS=-Wall -Werror -Wextra -pedantic
 LIBS=-llua -lSDL2 -lSDL2_gfx -Isrc
 SOURCES=$(shell find src -name "*.c")
 INCLUDES=$(shell find src -name "*.h")

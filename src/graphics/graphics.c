@@ -18,11 +18,13 @@ int glua_graphics_set_color(lua_State *L) {
 }
 
 int glua_graphics_clear(lua_State *L) {
+	(void)L;
 	SDL_RenderClear(renderer);
 	return 0;
 }
 
 int glua_graphics_show(lua_State *L) {
+	(void)L;
 	SDL_RenderPresent(renderer);
 	return 0;
 }

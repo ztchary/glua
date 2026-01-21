@@ -11,6 +11,7 @@ bool glua_init() {
 }
 
 int glua_quit(lua_State *L) {
+	(void)L;
 	quit = true;
 	return 0;
 }
