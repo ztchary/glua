@@ -22,6 +22,14 @@ these functions should be defined in your code...
 
 `glua.draw(dt)` draw is called every frame with deltatime
 
+## glua.data
+
+`glua.data.rect(x, y, w, h)` create a rectangle object
+
+`glua.data.rect(x, y, rx, ry)` rect is also used for ellipses
+
+`glua.data.color(r, g, b, a)` create a color object
+
 ## glua.window
 
 `glua.window.set_name(name)` sets the window name
@@ -30,29 +38,27 @@ these functions should be defined in your code...
 
 ## glua.graphics
 
-`glua.graphics.set_color(r, g, b, a)` sets the drawing color, values are 0.0 .. 1.0
-
-`glua.graphics.set_color({ r, g, b, a })` color can also be supplied as an array
+`glua.graphics.set_color(color)` sets the drawing color
 
 `glua.graphics.clear()` clears the screen with the drawing color
 
 `glua.graphics.show()` displays the rendered image on the screen (required)
 
-`glua.graphics.draw_rect(x, y, w, h)` draws a rectangle with the drawing color
+`glua.graphics.draw_rect(rect)` draws a rectangle with the drawing color
 
-`glua.graphics.draw_rects({ { x, y, w, h }, { ... } ... })` draws multiple rectangles with the drawing color
+`glua.graphics.draw_rects({ rect, ... })` draws multiple rectangles with the drawing color
 
-`glua.graphics.fill_rect(x, y, w, h)` fills a rectangle with the drawing color
+`glua.graphics.fill_rect(rect)` fills a rectangle with the drawing color
 
-`glua.graphics.fill_rects({ { x, y, w, h }, { ... } ... })` fills multiple rectangles with the drawing color
+`glua.graphics.fill_rects({ rect, ... })` fills multiple rectangles with the drawing color
 
-`glua.graphics.draw_ellipse(x, y, rx, ry)` draws an ellipse with the drawing color
+`glua.graphics.draw_ellipse(rect)` draws an ellipse with the drawing color, rect.w and rect.h are used as x and y radius
 
-`glua.graphics.draw_ellipses({ { x, y, rx, ry }, { ... } ... })` draws multiple ellipses with the drawing color
+`glua.graphics.draw_ellipses({ rect, ... })` draws multiple ellipses with the drawing color
 
-`glua.graphics.fill_ellipse(x, y, rx, ry)` fills an ellipse with the drawing color
+`glua.graphics.fill_ellipse(rect)` fills an ellipse with the drawing color
 
-`glua.graphics.fill_ellipses({ { x, y, rx, ry }, { ... } ... })` fills multiple ellipses with the drawing color
+`glua.graphics.fill_ellipses({ rect, ... })` fills multiple ellipses with the drawing color
 
 ## glua.keyboard
 

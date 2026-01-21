@@ -8,5 +8,5 @@ extern SDL_Window *window;
 
 bool glua_window_init();
 
-int glua_window_link(lua_State *L);
+int glua_window_link(lua_State *);
 

@@ -7,5 +7,5 @@
 
 void glua_event_handle(lua_State *L, SDL_Event *e);
 
-int glua_event_link(lua_State *L);
+int glua_event_link(lua_State *);
 

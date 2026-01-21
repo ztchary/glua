@@ -8,6 +8,7 @@
 #include "window/window.h"
 #include "audio/audio.h"
 #include "event/event.h"
+#include "data/data.h"
 
 extern bool quit;
 

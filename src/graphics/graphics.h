@@ -8,9 +8,9 @@
 #include "window/window.h"
 
 extern SDL_Renderer *renderer;
-extern uint8_t color[4];
+extern SDL_Color color;
 
 bool glua_graphics_init();
 
-int glua_graphics_link(lua_State *L);
+int glua_graphics_link(lua_State *);
 

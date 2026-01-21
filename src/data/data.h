@@ -4,7 +4,5 @@
 #include <lauxlib.h>
 #include <SDL2/SDL.h>
 
-bool glua_audio_init();
-
-int glua_audio_link(lua_State *);
+int glua_data_link(lua_State *);
 

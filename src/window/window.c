@@ -1,7 +1,7 @@
 #include "window/window.h"
 
 SDL_Window *window;
-const char *name = NULL;
+const char *name = "glua project";
 int width = 800;
 int height = 600;
 

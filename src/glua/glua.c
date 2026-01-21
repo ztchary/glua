@@ -26,6 +26,7 @@ static const luaL_Reg glua_modules[] = {
 	{ "window",   glua_window_link },
 	{ "audio",    glua_audio_link },
 	{ "event",    glua_event_link },
+	{ "data",     glua_data_link },
 	{ NULL, NULL }
 };
 
@@ -38,7 +39,7 @@ void glua_add_path(lua_State* L, const char* path) {
   snprintf(new_path, sizeof(new_path), "%s;%s", cur_path, path);
   lua_pushstring(L, new_path);
   lua_setfield(L, -3, "path");
-  lua_pop(L, 2);
+  lua_pop(L, 1);
 }
 
 int glua_link(lua_State *L, const char *project_path) {
@@ -51,3 +52,4 @@ int glua_link(lua_State *L, const char *project_path) {
 	lua_setglobal(L, "glua");
 	return 0;
 }
+
