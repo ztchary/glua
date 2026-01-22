@@ -10,9 +10,10 @@
 #include "event/event.h"
 #include "data/data.h"
 
-extern bool quit;
+extern const char *project_path;
 
 bool glua_init();
+void glua_quit();
 
 int glua_link(lua_State *, const char *);
 

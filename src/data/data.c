@@ -7,8 +7,8 @@ static const luaL_Reg glua_data_functions[] = {
 };
 
 static const luaL_Reg glua_data_modules[] = {
-	{ "rect", glua_data_rect_link },
-	{ "color", glua_data_color_link },
+	{ "Rect", glua_data_rect_link },
+	{ "Color", glua_data_color_link },
 	{ NULL, NULL }
 };
 

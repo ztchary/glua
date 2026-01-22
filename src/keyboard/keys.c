@@ -98,3 +98,4 @@ const char *glua_keyboard_keys[] = {
 	"kp_0",
 	"kp_period",
 };
+

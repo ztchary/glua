@@ -1,6 +1,7 @@
 #include "graphics/graphics.h"
 #include "graphics/rect.h"
 #include "graphics/ellipse.h"
+#include "window/window.h"
 
 SDL_Renderer *renderer;
 SDL_Color color;
@@ -11,8 +12,12 @@ bool glua_graphics_init() {
 	return renderer != NULL;
 }
 
+void glua_graphics_quit() {
+	SDL_DestroyRenderer(renderer);
+}
+
 int glua_graphics_set_color(lua_State *L) {
-	color = *(SDL_Color *)luaL_checkudata(L, 1, "glua_color");
+	color = *(SDL_Color *)luaL_checkudata(L, 1, "glua.data.Color");
 	SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
 	return 0;
 }

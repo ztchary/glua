@@ -1,48 +1,29 @@
 #include "audio/audio.h"
+#include "audio/source.h"
 
-SDL_AudioDeviceID audio_id;
+#define AUDIO_FORMAT_INIT MIX_INIT_MP3 | MIX_INIT_OGG
 
 bool glua_audio_init() {
-	SDL_AudioSpec spec = {
-		.freq = 44100,
-		.format = AUDIO_S16SYS,
-		.channels = 1,
-		.samples = 1024,
-		.callback = NULL,
-	};
+	if (Mix_Init(AUDIO_FORMAT_INIT) == 0) return false;
+	if (Mix_OpenAudio(48000, MIX_DEFAULT_FORMAT, 2, 4096) < 0) return false;
 
-	audio_id = SDL_OpenAudioDevice(NULL, 0, &spec, NULL, 0);
+	Mix_AllocateChannels(16);
 
 	return true;
 }
 
-int glua_audio_play_samples(lua_State *L) {
-	luaL_checktype(L, 1, LUA_TTABLE);
-	int n = lua_rawlen(L, 1);
-	short *samples = malloc(sizeof(short) * n);
-	for (int i = 0; i < n; i++) {
-		lua_rawgeti(L, 1, i + 1);
-		if (!lua_isnumber(L, 2)) {
-			free(samples);
-			luaL_error(L, "samples must be numbers");
-			return 0;
-		}
-		samples[i] = (short)(lua_tonumber(L, 2) * 32767.0);
-		lua_pop(L, 1);
-	}
-	SDL_QueueAudio(audio_id, samples, sizeof(short) * n);
-	SDL_PauseAudioDevice(audio_id, 0);
-	free(samples);
-	return 0;
+void glua_audio_quit() {
+	Mix_Quit();
 }
 
 static const luaL_Reg glua_audio_functions[] = {
-	{ "play_samples", glua_audio_play_samples },
 	{ NULL, NULL }
 };
 
 int glua_audio_link(lua_State *L) {
 	luaL_newlib(L, glua_audio_functions);
+	glua_audio_source_link(L);
+	lua_setfield(L, -2, "Source");
 	return 0;
 }
 

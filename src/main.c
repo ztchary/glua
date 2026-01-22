@@ -12,6 +12,7 @@ void crash_if(lua_State *L, bool do_crash) {
 	if (!do_crash) return;
 	const char *err = lua_tostring(L, -1);
 	fprintf(stderr, "Error: %s\n", err);
+	glua_quit();
 	lua_close(L);
 	exit(1);
 }
@@ -24,38 +25,30 @@ int main(int argc, char **argv) {
 
 	const char *project_path = argv[1];
 	char main_lua[128];
-	char link_path[128];
 
 	path_join(main_lua, project_path, "main.lua");
-	path_join(link_path, project_path, "?.lua");
-
-	lua_State *L = luaL_newstate();
-	luaL_openlibs(L);
-
-	glua_link(L, link_path);
-
-	crash_if(L, luaL_dofile(L, main_lua) != 0);
-
-	lua_getglobal(L, "glua");
-	lua_getfield(L, -1, "init");
-
-	if(!lua_isfunction(L, -1)) {
-		fprintf(stderr, "Couldn't find glua.init\n");
-		return 1;
-	}
-
-	crash_if(L, lua_pcall(L, 0, 0, 0) != LUA_OK);
 
 	if (!glua_init()) {
 		fprintf(stderr, "Failed to initialize\n");
 		return 1;
 	}
 
+	lua_State *L = luaL_newstate();
+	luaL_openlibs(L);
+
+	glua_link(L, project_path);
+
+	crash_if(L, luaL_dofile(L, main_lua) != 0);
+
 	unsigned int last_tick = SDL_GetTicks();
 	SDL_Event e;
-	while (!quit) {
+	bool run = true;
+	while (run) {
 		while (SDL_PollEvent(&e)) {
-			if (e.type == SDL_QUIT) quit = true;
+			if (e.type == SDL_QUIT) run = false;
+			if (e.type == SDL_WINDOWEVENT_SIZE_CHANGED) {
+				printf("resize\n");
+			}
 			glua_event_handle(L, &e);
 		}
 		unsigned int cur_tick = SDL_GetTicks();
@@ -72,6 +65,6 @@ int main(int argc, char **argv) {
 	}
 
 	lua_close(L);
-	SDL_Quit();
+	glua_quit();
 }
 

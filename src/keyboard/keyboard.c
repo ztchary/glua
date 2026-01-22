@@ -1,4 +1,5 @@
 #include "keyboard/keyboard.h"
+#include "keyboard/keys.h"
 
 int glua_keyboard_is_pressed(lua_State *L) {
 	const uint8_t *keyboard_state = SDL_GetKeyboardState(NULL);

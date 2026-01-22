@@ -18,17 +18,15 @@ will change violently and rapidly
 
 these functions should be defined in your code...
 
-`glua.init()` init is called before initialization of the other modules
-
 `glua.draw(dt)` draw is called every frame with deltatime
 
 ## glua.data
 
-`glua.data.rect(x, y, w, h)` create a rectangle object
+`glua.data.Rect(x, y, w, h)` create a rectangle object
 
-`glua.data.rect(x, y, rx, ry)` rect is also used for ellipses
+`glua.data.Rect(x, y, rx, ry)` rect is also used for ellipses
 
-`glua.data.color(r, g, b, a)` create a color object
+`glua.data.Color(r, g, b, a)` create a color object (values range from 0.0 to 1.0)
 
 ## glua.window
 
@@ -66,7 +64,17 @@ these functions should be defined in your code...
 
 ## glua.audio
 
-`glua.audio.play_samples({ 0.0, -1.0, 1.0 ... })` play raw samples, -1.0 to 1.0 at 44.1kHz
+`glua.audio.Source(path)` load new audio source from file
+
+`Source:play()` play or resume an audio source
+
+`Source:play(n)` play an audio source, looped n times
+
+`Source:pause()` pause audio source
+
+`Source:stop()` stop playing audio, running play will restart the audio
+
+`Source:set_volume(vol)` set audio source volume (values range from 0.0 to 1.0)
 
 ## glua.event
 
@@ -75,7 +83,7 @@ register these functions in your game, for example...
 ```lua
 function glua.event.on_keydown(key)
     if key == "q" then
-        glua.quit()
+        glua.exit()
     end
 end
 ```
@@ -86,7 +94,7 @@ currently available events include...
 
 `glua.event.on_keyup(key)`
 
-`glua.event.on_quit()`
+`glua.event.on_exit()`
 
 [keys]: https://github.com/ztchary/glua/blob/main/src/keyboard/keys.c
 

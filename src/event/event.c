@@ -1,3 +1,4 @@
+#include "keyboard/keys.h"
 #include "event/event.h"
 
 void glua_call_event(lua_State *L, const char *name, int n_args) {
@@ -26,7 +27,7 @@ void glua_event_handle(lua_State *L, SDL_Event *e) {
 		glua_call_event(L, "on_keyup", 1);
 		break;
 	case SDL_QUIT:
-		glua_call_event(L, "on_quit", 0);
+		glua_call_event(L, "on_exit", 0);
 		break;
 	default:
 		break;
