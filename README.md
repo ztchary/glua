@@ -6,7 +6,7 @@ just trying out the lua api, and getting better with sdl2
 
 ## check out examples
 
-./glua snage.lua
+./glua examples/snake
 
 # docs
 
@@ -30,7 +30,7 @@ these functions should be defined in your code...
 
 ## glua.window
 
-`glua.window.set_name(name)` sets the window name
+`glua.window.set_title(title)` sets the window title
 
 `glua.window.set_size(width, height)` sets the window size
 
