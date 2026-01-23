@@ -6,7 +6,7 @@ SDL_Rect *glua_graphics_get_ellipses(lua_State *L, int *n) {
 	SDL_Rect *ellipses = malloc(*n * sizeof(SDL_Rect));
 	for (int i = 0; i < *n; i++) {
 		lua_rawgeti(L, 1, i + 1);
-		SDL_Rect *ellipse = luaL_checkudata(L, 2, "glua.data.Rect");
+		SDL_Rect *ellipse = luaL_checkudata(L, 2, "glua.data.rect");
 		if (ellipse == NULL) {
 			free(ellipses);
 			return NULL;
@@ -18,7 +18,7 @@ SDL_Rect *glua_graphics_get_ellipses(lua_State *L, int *n) {
 }
 
 int glua_graphics_draw_ellipse(lua_State *L) {
-	SDL_Rect *ellipse = luaL_checkudata(L, 1, "glua.data.Rect");
+	SDL_Rect *ellipse = luaL_checkudata(L, 1, "glua.data.rect");
 	ellipseRGBA(renderer, ellipse->x, ellipse->y, ellipse->w, ellipse->h, color.r, color.g, color.b, color.a);
 	return 0;
 }
@@ -37,7 +37,7 @@ int glua_graphics_draw_ellipses(lua_State *L) {
 }
 
 int glua_graphics_fill_ellipse(lua_State *L) {
-	SDL_Rect *ellipse = luaL_checkudata(L, 1, "glua.data.Rect");
+	SDL_Rect *ellipse = luaL_checkudata(L, 1, "glua.data.rect");
 	filledEllipseRGBA(renderer, ellipse->x, ellipse->y, ellipse->w, ellipse->h, color.r, color.g, color.b, color.a);
 	return 0;
 }

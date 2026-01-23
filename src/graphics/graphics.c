@@ -1,6 +1,8 @@
 #include "graphics/graphics.h"
 #include "graphics/rect.h"
 #include "graphics/ellipse.h"
+#include "graphics/texture.h"
+#include "texture/type.h"
 #include "window/window.h"
 
 SDL_Renderer *renderer;
@@ -17,7 +19,7 @@ void glua_graphics_quit() {
 }
 
 int glua_graphics_set_color(lua_State *L) {
-	color = *(SDL_Color *)luaL_checkudata(L, 1, "glua.data.Color");
+	color = *(SDL_Color *)luaL_checkudata(L, 1, "glua.data.color");
 	SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
 	return 0;
 }
@@ -46,6 +48,7 @@ static const luaL_Reg glua_graphics_functions[] = {
 	{ "draw_ellipses", glua_graphics_draw_ellipses },
 	{ "fill_ellipse",  glua_graphics_fill_ellipse },
 	{ "fill_ellipses", glua_graphics_fill_ellipses },
+	{ "draw_texture",  glua_graphics_draw_texture },
 	{ NULL, NULL }
 };
 

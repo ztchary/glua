@@ -36,6 +36,7 @@ static const luaL_Reg glua_modules[] = {
 	{ "audio",    glua_audio_link },
 	{ "event",    glua_event_link },
 	{ "data",     glua_data_link },
+	{ "texture",  glua_texture_link },
 	{ NULL, NULL }
 };
 

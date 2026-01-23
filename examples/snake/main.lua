@@ -3,14 +3,17 @@ SIZE = 50
 WIDTH = 15
 HEIGHT = 10
 
-BG_COLOR    = glua.data.Color(0, 0, 0, 1)
-APPLE_COLOR = glua.data.Color(1, 0, 0, 1)
+BG_COLOR    = glua.data.color(0, 0, 0, 1)
+APPLE_COLOR = glua.data.color(1, 0, 0, 1)
 
-MOV_DIR_NONE  = { x =  0, y =  0 }
-MOV_DIR_RIGHT = { x =  1, y =  0 }
-MOV_DIR_LEFT  = { x = -1, y =  0 }
-MOV_DIR_UP    = { x =  0, y = -1 }
-MOV_DIR_DOWN  = { x =  0, y =  1 }
+MOV_DIR_NONE = { x =  0, y =  0 }
+
+MOV_DIRS = {
+	["right"] = { x =  1, y =  0 },
+	["left"]  = { x = -1, y =  0 },
+	["up"]    = { x =  0, y = -1 },
+	["down"]  = { x =  0, y =  1 }
+}
 
 local mov_queue
 local snake
@@ -19,6 +22,9 @@ local apple
 
 local apple_sound
 local death_sound
+
+local snake_image
+local apple_image
 
 function random_pos()
 	pos = {}
@@ -40,22 +46,24 @@ function hitting_snake(pos)
 	return false
 end
 
-function new_apple()
+function new_apple(pos)
 	repeat
 		apple = random_pos()
-	until not hitting_snake(apple)
+	until not (hitting_snake(apple) or pos_eq(apple, pos))
 end
 
 function reset()
 	mov_queue = { MOV_DIR_NONE }
 	snake = { random_pos() }
 	length = 3
-	new_apple()
+	new_apple({ -1, -1 })
 end
 
 function setup()
-	apple_sound = glua.audio.Source("apple.wav")
-	death_sound = glua.audio.Source("death.wav")
+	apple_sound = glua.audio.load_file("apple.wav")
+	death_sound = glua.audio.load_file("death.wav")
+	snake_image = glua.texture.load_file("snake.jpg")
+	apple_image = glua.texture.load_file("apple.jpg")
 	glua.window.set_title("glua snake")
 	glua.window.set_size(WIDTH * SIZE, HEIGHT * SIZE)
 	reset()
@@ -74,7 +82,7 @@ function update()
 	if pos_eq(apple, head) then
 		apple_sound:play()
 		length = length + 1
-		new_apple()
+		new_apple(head)
 	end
 
 	while #snake > length - 1 do
@@ -91,23 +99,13 @@ function update()
 end
 
 function glua.event.on_keydown(key)
-	if key == "q" then
-		glua.exit()
-	end
+	if key == "q" then glua.exit() end
+	local mov_dir = MOV_DIRS[key]
 	if #mov_queue > 5 then return end
-	if key == "right" then
-		if mov_queue[#mov_queue].x ~= 0 then return end
-		table.insert(mov_queue, MOV_DIR_RIGHT)
-	elseif key == "left" then
-		if mov_queue[#mov_queue].x ~= 0 then return end
-		table.insert(mov_queue, MOV_DIR_LEFT)
-	elseif key == "up" then
-		if mov_queue[#mov_queue].y ~= 0 then return end
-		table.insert(mov_queue, MOV_DIR_UP)
-	elseif key == "down" then
-		if mov_queue[#mov_queue].y ~= 0 then return end
-		table.insert(mov_queue, MOV_DIR_DOWN)
-	end
+	if mov_dir == nil then return end
+	if mov_queue[#mov_queue].x * mov_dir.x ~= 0 then return end
+	if mov_queue[#mov_queue].y * mov_dir.y ~= 0 then return end
+	table.insert(mov_queue, mov_dir)
 end
 
 ts = 0
@@ -118,19 +116,19 @@ function glua.draw(dt)
 	update()
 	glua.graphics.set_color(BG_COLOR)
 	glua.graphics.clear()
-	glua.graphics.set_color(glua.data.Color(1, 0, 0, 1))
-	local apple_rect = glua.data.Rect(
-		apple.x * SIZE + SIZE / 2,
-		apple.y * SIZE + SIZE / 2,
-		SIZE / 2,
-		SIZE / 2
+	glua.graphics.set_color(glua.data.color(1, 0, 0, 1))
+	local apple_rect = glua.data.rect(
+		apple.x * SIZE,
+		apple.y * SIZE,
+		SIZE,
+		SIZE
 	)
-	glua.graphics.fill_ellipse(apple_rect)
-	local snake_color = glua.data.Color(0, 0, 0, 1)
+	glua.graphics.draw_texture(apple_image, apple_rect)
+	local snake_color = glua.data.color(0, 0, 0, 1)
 	for i, pos in ipairs(snake) do
 		snake_color.g = i / #snake / 2 + 0.5
 		glua.graphics.set_color(snake_color)
-		local snake_rect = glua.data.Rect(
+		local snake_rect = glua.data.rect(
 			pos.x * SIZE,
 			pos.y * SIZE,
 			SIZE,
@@ -138,8 +136,8 @@ function glua.draw(dt)
 		)
 		glua.graphics.fill_rect(snake_rect)
 	end
-	glua.window.set_title("glua snake")
-	glua.window.set_size(WIDTH * SIZE, HEIGHT * SIZE)
+	local head_rect = glua.data.rect(snake[#snake].x * SIZE, snake[#snake].y * SIZE, SIZE, SIZE)
+	glua.graphics.draw_texture(snake_image, head_rect)
 	glua.graphics.show()
 end
 

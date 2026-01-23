@@ -9,6 +9,7 @@
 #include "audio/audio.h"
 #include "event/event.h"
 #include "data/data.h"
+#include "texture/texture.h"
 
 extern const char *project_path;
 

@@ -3,7 +3,7 @@
 const char *rect_fields[] = { "x", "y", "w", "h" };
 
 int glua_data_rect_index(lua_State *L) {
-	SDL_Rect *rect = (SDL_Rect *)luaL_checkudata(L, 1, "glua.data.Rect");
+	SDL_Rect *rect = (SDL_Rect *)luaL_checkudata(L, 1, "glua.data.rect");
 	
 	const char *index = luaL_checkstring(L, 2);
 
@@ -18,7 +18,7 @@ int glua_data_rect_index(lua_State *L) {
 }
 
 int glua_data_rect_newindex(lua_State *L) {
-	SDL_Rect *rect = (SDL_Rect *)luaL_checkudata(L, 1, "glua.data.Rect");
+	SDL_Rect *rect = (SDL_Rect *)luaL_checkudata(L, 1, "glua.data.rect");
 	
 	const char *index = luaL_checkstring(L, 2);
 
@@ -39,7 +39,7 @@ int glua_data_rect(lua_State *L) {
 	int h = (int)luaL_checknumber(L, 4);
 	SDL_Rect *rect = lua_newuserdata(L, sizeof(SDL_Rect));
 
-	luaL_getmetatable(L, "glua.data.Rect");
+	luaL_getmetatable(L, "glua.data.rect");
 	lua_setmetatable(L, -2);
 
 	*rect = (SDL_Rect){ x, y, w, h };
@@ -54,7 +54,7 @@ static const luaL_Reg glua_data_rect_functions[] = {
 };
 
 int glua_data_rect_link(lua_State *L) {
-	luaL_newmetatable(L, "glua.data.Rect");
+	luaL_newmetatable(L, "glua.data.rect");
 	luaL_setfuncs(L, glua_data_rect_functions, 0);
 	lua_pop(L, 1);
 	lua_pushcfunction(L, glua_data_rect);

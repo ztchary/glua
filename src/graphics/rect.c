@@ -5,7 +5,7 @@ SDL_Rect *glua_graphics_get_rects(lua_State *L, int *n) {
 	SDL_Rect *rects = malloc(*n * sizeof(SDL_Rect));
 	for (int i = 0; i < *n; i++) {
 		lua_rawgeti(L, 1, i + 1);
-		SDL_Rect *rect = luaL_checkudata(L, 2, "glua.data.Rect");
+		SDL_Rect *rect = luaL_checkudata(L, 2, "glua.data.rect");
 		if (rect == NULL) {
 			free(rects);
 			return NULL;
@@ -17,7 +17,7 @@ SDL_Rect *glua_graphics_get_rects(lua_State *L, int *n) {
 }
 
 int glua_graphics_draw_rect(lua_State *L) {
-	SDL_Rect *rect = luaL_checkudata(L, 1, "glua.data.Rect");
+	SDL_Rect *rect = luaL_checkudata(L, 1, "glua.data.rect");
 	SDL_RenderDrawRect(renderer, rect);
 	return 0;
 }
@@ -33,7 +33,7 @@ int glua_graphics_draw_rects(lua_State *L) {
 }
 
 int glua_graphics_fill_rect(lua_State *L) {
-	SDL_Rect *rect = luaL_checkudata(L, 1, "glua.data.Rect");
+	SDL_Rect *rect = luaL_checkudata(L, 1, "glua.data.rect");
 	SDL_RenderFillRect(renderer, rect);
 	return 0;
 }

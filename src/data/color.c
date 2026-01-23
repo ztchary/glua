@@ -3,7 +3,7 @@
 const char *color_fields[] = { "r", "g", "b", "a" };
 
 int glua_data_color_index(lua_State *L) {
-	SDL_Color *color = (SDL_Color *)luaL_checkudata(L, 1, "glua.data.Color");
+	SDL_Color *color = (SDL_Color *)luaL_checkudata(L, 1, "glua.data.color");
 	
 	const char *index = luaL_checkstring(L, 2);
 
@@ -18,7 +18,7 @@ int glua_data_color_index(lua_State *L) {
 }
 
 int glua_data_color_newindex(lua_State *L) {
-	SDL_Color *color = (SDL_Color *)luaL_checkudata(L, 1, "glua.data.Color");
+	SDL_Color *color = (SDL_Color *)luaL_checkudata(L, 1, "glua.data.color");
 	
 	const char *index = luaL_checkstring(L, 2);
 
@@ -43,7 +43,7 @@ int glua_data_color(lua_State *L) {
 	luaL_argcheck(L, a >= 0 && a <= 255, 4, "color values must be between 0.0 and 1.0");
 	SDL_Color *color = lua_newuserdata(L, sizeof(SDL_Color));
 
-	luaL_getmetatable(L, "glua.data.Color");
+	luaL_getmetatable(L, "glua.data.color");
 	lua_setmetatable(L, -2);
 
 	*color = (SDL_Color){ r, g, b, a };
@@ -58,7 +58,7 @@ static const luaL_Reg glua_data_color_functions[] = {
 };
 
 int glua_data_color_link(lua_State *L) {
-	luaL_newmetatable(L, "glua.data.Color");
+	luaL_newmetatable(L, "glua.data.color");
 	luaL_setfuncs(L, glua_data_color_functions, 0);
 	lua_pop(L, 1);
 	lua_pushcfunction(L, glua_data_color);

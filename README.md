@@ -22,17 +22,23 @@ these functions should be defined in your code...
 
 ## glua.data
 
-`glua.data.Rect(x, y, w, h)` create a rectangle object
+`glua.data.rect(x, y, w, h)` create a rectangle object
 
-`glua.data.Rect(x, y, rx, ry)` rect is also used for ellipses
+`glua.data.rect(x, y, rx, ry)` rect is also used for ellipses
 
-`glua.data.Color(r, g, b, a)` create a color object (values range from 0.0 to 1.0)
+`glua.data.color(r, g, b, a)` create a color object (values range from 0.0 to 1.0)
 
 ## glua.window
 
 `glua.window.set_name(name)` sets the window name
 
 `glua.window.set_size(width, height)` sets the window size
+
+## glua.texture
+
+`glua.texture.load_file(path)` loads an image file as a texture
+
+`texture:get_size()` returns the width and height of the image
 
 ## glua.graphics
 
@@ -58,23 +64,25 @@ these functions should be defined in your code...
 
 `glua.graphics.fill_ellipses({ rect, ... })` fills multiple ellipses with the drawing color
 
+`glua.graphics.draw_texture(texture, rect)` renders a texture to the screen
+
 ## glua.keyboard
 
 `glua.keyboard.is_pressed(key) -> bool` queries key status, look at [keys.c][keys] for accepted values
 
 ## glua.audio
 
-`glua.audio.Source(path)` load new audio source from file
+`glua.audio.source(path)` load new audio source from file
 
-`Source:play()` play or resume an audio source
+`source:play()` play or resume an audio source
 
-`Source:play(n)` play an audio source, looped n times
+`source:play(n)` play an audio source, looped n times
 
-`Source:pause()` pause audio source
+`source:pause()` pause audio source
 
-`Source:stop()` stop playing audio, running play will restart the audio
+`source:stop()` stop playing audio, running play will restart the audio
 
-`Source:set_volume(vol)` set audio source volume (values range from 0.0 to 1.0)
+`source:set_volume(vol)` set audio source volume (values range from 0.0 to 1.0)
 
 ## glua.event
 
