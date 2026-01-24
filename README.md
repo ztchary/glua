@@ -72,7 +72,7 @@ these functions should be defined in your code...
 
 ## glua.audio
 
-`glua.audio.source(path)` load new audio source from file
+`glua.audio.load_file(path)` load new audio source from file
 
 `source:play()` play or resume an audio source
 

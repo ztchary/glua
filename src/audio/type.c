@@ -8,6 +8,8 @@ struct glua_audio_type {
 	int pause;
 };
 
+int n_channel = 0;
+
 int glua_audio_type_new(lua_State *L) {
 	const char *rel_path = luaL_checkstring(L, 1);
 	char path[128];
@@ -23,8 +25,10 @@ int glua_audio_type_new(lua_State *L) {
 	struct glua_audio_type *audio = (struct glua_audio_type *)lua_newuserdata(L, sizeof(struct glua_audio_type));
 	*audio = (struct glua_audio_type){
 		.chunk = chunk,
-		.channel = -1,
+		.channel = n_channel++,
 	};
+
+	Mix_AllocateChannels(n_channel);
 
 	luaL_getmetatable(L, "glua.audio");
 	lua_setmetatable(L, -2);
@@ -50,11 +54,11 @@ int glua_audio_type_play(lua_State *L) {
 		return 0;
 	}
 
-	if (audio->channel != -1) {
+	if (Mix_Playing(audio->channel)) {
 		Mix_HaltChannel(audio->channel);
 	}
 
-	audio->channel = Mix_PlayChannel(-1, audio->chunk, loops);
+	audio->channel = Mix_PlayChannel(audio->channel, audio->chunk, loops);
 
 	return 0;
 }
@@ -62,20 +66,16 @@ int glua_audio_type_play(lua_State *L) {
 int glua_audio_type_pause(lua_State *L) {
 	struct glua_audio_type *audio = (struct glua_audio_type *)luaL_checkudata(L, 1, "glua.audio");
 
-	if (audio->channel == -1) return 0;
-
 	Mix_Pause(audio->channel);
 	audio->pause = 1;
 
 	return 0;
 }
 
-
 int glua_audio_type_stop(lua_State *L) {
 	struct glua_audio_type *audio = (struct glua_audio_type *)luaL_checkudata(L, 1, "glua.audio");
 
-	if (audio->channel != -1) Mix_HaltChannel(audio->channel);
-	audio->channel = -1;
+	Mix_HaltChannel(audio->channel);
 
 	return 0;
 }

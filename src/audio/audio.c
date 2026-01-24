@@ -5,7 +5,7 @@
 
 bool glua_audio_init() {
 	if (Mix_Init(AUDIO_FORMAT_INIT) == 0) return false;
-	if (Mix_OpenAudio(48000, MIX_DEFAULT_FORMAT, 2, 4096) < 0) return false;
+	if (Mix_OpenAudio(48000, MIX_DEFAULT_FORMAT, 2, 1024) < 0) return false;
 
 	Mix_AllocateChannels(16);
 
