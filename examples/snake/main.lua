@@ -22,6 +22,7 @@ local apple
 
 local apple_sound
 local death_sound
+local move_sound
 
 local snake_image
 local apple_image
@@ -62,6 +63,7 @@ end
 function setup()
 	apple_sound = glua.audio.load_file("apple.wav")
 	death_sound = glua.audio.load_file("death.wav")
+	move_sound = glua.audio.load_file("move.wav")
 	snake_image = glua.texture.load_file("snake.jpg")
 	apple_image = glua.texture.load_file("apple.jpg")
 	glua.window.set_title("glua snake")
@@ -91,6 +93,7 @@ function update()
 
 	if hitting_snake(head) or head.x < 0 or head.x == WIDTH or head.y < 0 or head.y == HEIGHT then
 		death_sound:play()
+		move_sound:stop()
 		reset()
 		return
 	end
@@ -106,6 +109,7 @@ function glua.event.on_keydown(key)
 	if mov_queue[#mov_queue].x * mov_dir.x ~= 0 then return end
 	if mov_queue[#mov_queue].y * mov_dir.y ~= 0 then return end
 	table.insert(mov_queue, mov_dir)
+	move_sound:play(-1)
 end
 
 ts = 0
