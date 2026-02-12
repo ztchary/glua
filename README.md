@@ -8,6 +8,11 @@ just trying out the lua api, and getting better with sdl2
 
 ./glua examples/snake
 
+### Snake plans
+
+- [ ] Death sound revamp
+- [ ] Add coin
+
 # docs
 
 will change violently and rapidly
